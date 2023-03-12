@@ -1,0 +1,5 @@
+# npm aliases
+alias nr='npm run'
+alias nid='npm i -D'
+alias nid-eslint='npm i -D eslint eslint-config-airbnb-base eslint-plugin-import eslint-plugin-unicorn'
+alias nrl='npm run lint'
