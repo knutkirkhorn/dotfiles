@@ -5,4 +5,5 @@ npm i -g \
 	@knutkirkhorn/week-number-cli \
 	cisco-vpn-rdp-connecter \
 	wifi-password-cli \
-	file-type-cli
+	file-type-cli \
+	sofic
