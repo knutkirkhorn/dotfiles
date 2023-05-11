@@ -12,6 +12,8 @@ source bootstrap.sh
 
 ### npm
 
+Run this script to install some CLIs.
+
 ```sh
 ./npm.sh
 ```
