@@ -6,3 +6,4 @@ alias nid-eslint='npm i -D eslint eslint-config-airbnb-base eslint-plugin-import
 alias nrl='npm run lint'
 alias nrd='npm run dev'
 alias nu='npm uninstall'
+alias no='npm outdated'
