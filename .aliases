@@ -11,3 +11,4 @@ alias no='npm outdated'
 # yarn aliases
 alias y='yarn'
 alias ys='yarn start'
+alias yb='yarn build'
