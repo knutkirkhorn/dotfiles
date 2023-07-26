@@ -7,3 +7,6 @@ alias nrl='npm run lint'
 alias nrd='npm run dev'
 alias nu='npm uninstall'
 alias no='npm outdated'
+
+# yarn aliases
+alias y='yarn'
