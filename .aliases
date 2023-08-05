@@ -1,4 +1,5 @@
 # npm aliases
+alias ns='npm start'
 alias nr='npm run'
 alias ni='npm i'
 alias nid='npm i -D'
