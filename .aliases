@@ -17,3 +17,6 @@ alias yb='yarn build'
 # python aliases
 alias python='python3'
 alias pip='python3 -m pip'
+
+# Requires jwt-cli (https://github.com/mike-engel/jwt-cli)
+alias jwd='jwt decode'
