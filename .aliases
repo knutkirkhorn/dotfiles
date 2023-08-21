@@ -13,3 +13,7 @@ alias no='npm outdated'
 alias y='yarn'
 alias ys='yarn start'
 alias yb='yarn build'
+
+# python aliases
+alias python='python3'
+alias pip='python3 -m pip'
