@@ -5,3 +5,15 @@ function gb() {
 	git add package-lock.json
 	git commit -m "Bump dependencies"
 }
+
+# Create a directory, navigate into it, initialize npm, open VS Code
+function mkdc() {
+	# Check if directory already exists
+	# Throw an error if it does
+	if [ -d "$@" ]; then
+		echo "Directory already exists"
+		return 1
+	fi
+
+	mkdir -p "$@" && cd "$@" && npm init -y && code .
+}
