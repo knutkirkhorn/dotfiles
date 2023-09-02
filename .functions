@@ -6,7 +6,7 @@ function gb() {
 	git commit -m "Bump dependencies"
 }
 
-# Create a directory, navigate into it, initialize npm, open VS Code
+# Create a directory, navigate into it, initialize npm and open VS Code
 function mkdc() {
 	# Check if directory already exists
 	# Throw an error if it does
