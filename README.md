@@ -23,3 +23,7 @@ Run this script to install some CLIs.
 - [Mathias Bynens](https://github.com/mathiasbynens/dotfiles)
 - [Zach Holman](https://github.com/holman/dotfiles)
 - [Paul Irish](https://github.com/paulirish/dotfiles)
+
+## Related
+
+- My [Windows aliases](https://github.com/knutkirkhorn/windows-aliases)
