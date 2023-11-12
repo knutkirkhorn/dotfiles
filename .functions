@@ -17,3 +17,20 @@ function mkdc() {
 
 	mkdir -p "$@" && cd "$@" && npm init -y && code .
 }
+
+# Install npm dependencies and add `@latest` to each dependency
+function nil() {
+	packages=""
+
+	for package in "$@"; do
+		# Remove existing "@latest" if present
+		package="${package/@latest/}"
+
+		# Append "@latest" to each package
+		package="$package@latest"
+
+		packages="$packages$package "
+	done
+
+	npm i $packages
+}
