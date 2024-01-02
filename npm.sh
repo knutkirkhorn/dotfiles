@@ -6,4 +6,5 @@ npm i -g \
 	cisco-vpn-rdp-connecter \
 	wifi-password-cli \
 	file-type-cli \
-	sofic
+	sofic \
+	npm-check-updates
