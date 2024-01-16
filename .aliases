@@ -9,6 +9,9 @@ alias nrd='npm run dev'
 alias nu='npm uninstall'
 alias no='npm outdated'
 
+# bun aliases
+alias bs='bun start'
+
 # yarn aliases
 alias y='yarn'
 alias ys='yarn start'
