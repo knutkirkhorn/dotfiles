@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 # npm aliases
 alias ns='npm start'
 alias nr='npm run'
