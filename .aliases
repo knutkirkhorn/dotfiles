@@ -13,7 +13,10 @@ alias no='npm outdated'
 
 # bun aliases
 alias bs='bun start'
+alias bi='bun install'
+alias br='bun run'
 alias brd='bun run dev'
+alias brl='bun run lint'
 
 # yarn aliases
 alias y='yarn'
