@@ -16,6 +16,7 @@ alias no='npm outdated'
 # bun aliases
 alias bs='bun start'
 alias bi='bun install'
+alias bid-eslint='bun add -D eslint eslint-config-airbnb-base eslint-plugin-import eslint-plugin-unicorn'
 alias br='bun run'
 alias brd='bun run dev'
 alias brl='bun run lint'
