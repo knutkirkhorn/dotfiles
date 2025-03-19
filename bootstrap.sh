@@ -17,3 +17,5 @@ if [ ! -f ~/.extra ]; then
 fi
 
 source ~/.bash_profile
+
+echo "Refreshed dotfiles!"
