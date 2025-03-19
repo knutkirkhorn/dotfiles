@@ -51,3 +51,35 @@ function nidl() {
 
 	npm i -D $packages
 }
+
+function update-shadcn-components() {
+	# Check if components/ui directory exists
+	if [ ! -d "components/ui" ]; then
+		echo "Error: components/ui directory not found"
+		return 1
+	fi
+
+	# Get all .tsx files in the directory and join them with spaces
+	components=$(find components/ui -name "*.tsx" -exec basename {} .tsx \; | tr '\n' ' ' | sed 's/ $//')
+
+	# Check if any components were found
+	if [ -z "$components" ]; then
+		echo "No .tsx files found in components/ui"
+		return 1
+	fi
+
+	# Run the shadcn add command with all components
+	echo "Updating components: $components"
+	eval "npx shadcn@latest add $components --overwrite"
+
+	echo "Updated components"
+
+	# Run ESLint and Prettier on the updated files
+	echo "Running ESLint with auto-fix on components/ui..."
+	npx eslint --fix "components/ui/**/*.{ts,tsx}"
+
+	echo "Running Prettier on components/ui..."
+	npx prettier --write "components/ui/**/*.{ts,tsx}"
+
+	echo "Done! Components updated, linted and formatted."
+}
