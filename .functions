@@ -33,7 +33,7 @@ function nil() {
 	done
 
 	# npm i $packages
-	echo "TODO: buggy - use 'ncu' CLI instead"
+	echo "TODO: buggy - use 'ncu' CLI instead (bun add -g npm-check-updates)"
 }
 
 # Install npm dev dependencies and add `@latest` to each dependency
@@ -51,7 +51,7 @@ function nidl() {
 	done
 
 	# npm i -D $packages
-	echo "TODO: buggy - use 'ncu' CLI instead"
+	echo "TODO: buggy - use 'ncu' CLI instead (bun add -g npm-check-updates)"
 }
 
 function update-shadcn-components() {
