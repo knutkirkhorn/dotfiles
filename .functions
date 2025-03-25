@@ -54,6 +54,15 @@ function nidl() {
 	echo "TODO: buggy - use 'ncu' CLI instead (bun add -g npm-check-updates)"
 }
 
+function sqlpretty() {
+	# Really dumb CLI function that uses the clipboard and removes:
+	# - '\n'
+	# - '\' in front of '"'
+	# The output is saved back to the clipboard
+
+	echo "$(pbpaste | tr -d '\n' | sed 's/\\"/"/g')" | pbcopy
+}
+
 function update-shadcn-components() {
 	# Check if components/ui directory exists
 	if [ ! -d "components/ui" ]; then
