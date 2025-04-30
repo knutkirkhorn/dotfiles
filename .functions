@@ -94,3 +94,13 @@ function update-shadcn-components() {
 
 	echo "Done! Components updated, linted and formatted."
 }
+
+function open-gitlab-pr() {
+	# Get the git remote url
+	git_remote_url=$(git remote get-url origin)
+	# Remove the .git ending of the url
+	git_remote_url=$(echo $git_remote_url | sed 's/\.git$//')
+	git_branch_name=$(git branch --show-current)
+	gitlab_pr_url="$git_remote_url/-/merge_requests/new?merge_request%5Bsource_branch%5D=$git_branch_name"
+	open $gitlab_pr_url
+}
