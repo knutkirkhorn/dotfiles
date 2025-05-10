@@ -7,4 +7,5 @@ npm i -g \
 	wifi-password-cli \
 	file-type-cli \
 	sofic \
-	npm-check-updates
+	npm-check-updates \
+	np
