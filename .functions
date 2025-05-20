@@ -104,3 +104,7 @@ function open-gitlab-pr() {
 	gitlab_pr_url="$git_remote_url/-/merge_requests/new?merge_request%5Bsource_branch%5D=$git_branch_name"
 	open $gitlab_pr_url
 }
+
+function cna() {
+	npx create-next-app@latest -e https://github.com/knutkirkhorn/next-template
+}
