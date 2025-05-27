@@ -8,4 +8,5 @@ npm i -g \
 	file-type-cli \
 	sofic \
 	npm-check-updates \
-	np
+	np \
+	@antfu/ni
