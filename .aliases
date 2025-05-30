@@ -36,5 +36,8 @@ alias jwd='jwt decode'
 
 alias o='open'
 
+# TEMP: Somethings seems broken with ni and pnpm, so adding custom temp alias
+alias pi='pnpm i'
+
 # Create Next App with my own template
 alias cna='npx create-next-app@latest -e https://github.com/knutkirkhorn/next-template'
