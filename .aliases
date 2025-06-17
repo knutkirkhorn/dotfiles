@@ -27,7 +27,6 @@ alias ys='yarn start'
 alias yb='yarn build'
 alias ya='yarn add'
 
-# TEMP: Somethings seems broken with ni and pnpm, so adding custom temp alias
 # pnpm aliases
 alias p='pnpm'
 alias pi='pnpm i'
