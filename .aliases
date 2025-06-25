@@ -35,6 +35,12 @@ alias pi='pnpm i'
 alias python='python3'
 alias pip='python3 -m pip'
 
+# Docker aliases
+alias d='docker'
+alias dc='docker compose'
+alias dcu='docker compose up'
+alias dcd='docker compose down'
+
 # Requires jwt-cli (https://github.com/mike-engel/jwt-cli)
 alias jwd='jwt decode'
 
