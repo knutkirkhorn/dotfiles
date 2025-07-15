@@ -101,6 +101,14 @@ function open-gitlab-pr() {
 	# Remove the .git ending of the url
 	git_remote_url=$(echo $git_remote_url | sed 's/\.git$//')
 	git_branch_name=$(git branch --show-current)
-	gitlab_pr_url="$git_remote_url/-/merge_requests/new?merge_request%5Bsource_branch%5D=$git_branch_name"
+
+	# Convert the branch name to a title
+	# - Remove everything before and including the first "/" in the branch name
+	#   => This will for example remove "feature/" from "feature/my-feature"
+	# - Replace dashes ("-") with URL encoded spaces ("%20")
+	# - Capitalize the first letter at the start
+	pr_title=$(echo "$git_branch_name" | sed 's#.*/##; s/-/%20/g' | awk '{print toupper(substr($0,1,1)) substr($0,2)}')
+
+	gitlab_pr_url="$git_remote_url/-/merge_requests/new?merge_request%5Bsource_branch%5D=$git_branch_name&merge_request%5Btitle%5D=$pr_title"
 	open $gitlab_pr_url
 }
