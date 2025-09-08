@@ -6,7 +6,7 @@
 # Install Homebrew packages
 # jwt-cli (https://github.com/mike-engel/jwt-cli)
 brew install mike-engel/jwt-cli/jwt-cli
-brew install scrcpy
+brew install scrcpy gitleaks
 
 # Install Homebrew GUI apps
 brew install --cask firefox docker visual-studio-code cursor raycast spotify tableplus postman ghostty proxyman git-credential-manager mockoon obsidian
