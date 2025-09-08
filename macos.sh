@@ -8,7 +8,8 @@
 brew install mike-engel/jwt-cli/jwt-cli
 brew install \
 	scrcpy \
-	gitleaks
+	gitleaks \
+	mas
 
 # Install Homebrew GUI apps
 brew install --cask \
@@ -33,3 +34,10 @@ curl -fsSL https://bun.sh/install | bash
 
 # Cleanup
 brew cleanup
+
+# Install macOS apps from App Store
+mas install 1611378436 # Pure Paste
+mas install 6502579523 # Week Number
+mas install 1632827132 # Camera Preview
+mas install 1295203466 # Windows App (for remote desktop)
+mas install 1604176982 # One Thing
