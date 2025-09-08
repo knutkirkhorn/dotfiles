@@ -15,3 +15,6 @@ brew install --cask firefox docker visual-studio-code cursor raycast spotify tab
 
 # Install Bun
 curl -fsSL https://bun.sh/install | bash
+
+# Cleanup
+brew cleanup
