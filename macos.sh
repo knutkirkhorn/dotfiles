@@ -9,7 +9,8 @@ brew install mike-engel/jwt-cli/jwt-cli
 brew install \
 	scrcpy \
 	gitleaks \
-	mas
+	mas \
+	ffmpeg
 
 # Install Homebrew GUI apps
 brew install --cask \
