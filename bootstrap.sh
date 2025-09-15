@@ -6,7 +6,7 @@ git pull
 cp .aliases ~/.aliases
 cp .functions ~/.functions
 cp .bash_profile ~/.bash_profile
-cp .gitignore ~/.gitignore
+cp global.gitignore ~/.gitignore
 
 # Set global gitignore
 git config --global core.excludesfile ~/.gitignore
