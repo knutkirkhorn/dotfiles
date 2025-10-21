@@ -10,7 +10,8 @@ brew install \
 	scrcpy \
 	gitleaks \
 	mas \
-	ffmpeg
+	ffmpeg \
+	mkcert
 
 # Install Homebrew GUI apps
 brew install --cask \
