@@ -20,6 +20,7 @@ alias bid-eslint='bun add -D eslint eslint-config-airbnb-base eslint-plugin-impo
 alias br='bun run'
 alias brd='bun run dev'
 alias brl='bun run lint'
+alias bui='bun update --interactive'
 
 # yarn aliases
 alias y='yarn'
