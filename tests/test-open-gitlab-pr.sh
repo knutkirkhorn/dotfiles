@@ -7,6 +7,12 @@ set -euo pipefail
 
 PASS=0
 FAIL=0
+
+# Color constants
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Override `open` so we capture the URL instead of launching a browser
@@ -45,10 +51,10 @@ assert_url() {
 	local actual="$OPENED_URL"
 
 	if [ "$actual" = "$expected" ]; then
-		echo "  PASS: $test_name"
+		echo -e "  ${GREEN}PASS${NC}: $test_name"
 		PASS=$((PASS + 1))
 	else
-		echo "  FAIL: $test_name"
+		echo -e "  ${RED}FAIL${NC}: $test_name"
 		echo "    Expected: $expected"
 		echo "    Actual:   $actual"
 		FAIL=$((FAIL + 1))
@@ -175,7 +181,7 @@ cleanup_repo
 # Summary
 # --------------------------------------------------------------------------
 echo ""
-echo "Results: $PASS passed, $FAIL failed"
+echo -e "Results: ${GREEN}$PASS passed${NC}, ${RED}$FAIL failed${NC}"
 
 if [ "$FAIL" -gt 0 ]; then
 	exit 1
