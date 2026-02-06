@@ -109,7 +109,7 @@ function open-gitlab-pr() {
 	# If so, use the commit message as the PR title
 	if [ $commits_ahead -eq 1 ]; then
 		# Set the PR title to the last commit message
-		pr_title=$(git log -1 --pretty=%B | sed 's#.*/##; s/ /%20/g')
+		pr_title=$(git log -1 --pretty=%B | sed 's/ /%20/g')
 	else
 		# Convert the branch name to a title
 		# - Remove everything before and including the first "/" in the branch name
