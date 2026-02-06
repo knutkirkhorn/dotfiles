@@ -11,6 +11,7 @@ FAIL=0
 # Color constants
 GREEN='\033[0;32m'
 RED='\033[0;31m'
+BOLD='\033[1m'
 NC='\033[0m' # No Color
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -64,7 +65,7 @@ assert_url() {
 # --------------------------------------------------------------------------
 # Test 1: Multiple commits – PR title derived from branch name
 # --------------------------------------------------------------------------
-echo "Test 1: Multiple commits - title from branch name"
+echo -e "${BOLD}Test 1: Multiple commits - title from branch name${NC}"
 setup_repo "https://gitlab.com/user/my-project.git"
 
 git checkout -b feature/my-cool-feature --quiet
@@ -81,7 +82,7 @@ cleanup_repo
 # --------------------------------------------------------------------------
 # Test 2: Single commit – PR title derived from commit message
 # --------------------------------------------------------------------------
-echo "Test 2: Single commit - title from commit message"
+echo -e "${BOLD}Test 2: Single commit - title from commit message${NC}"
 setup_repo "https://gitlab.com/user/my-project.git"
 
 git checkout -b feature/some-branch --quiet
@@ -97,7 +98,7 @@ cleanup_repo
 # --------------------------------------------------------------------------
 # Test 3: Remote URL without .git suffix
 # --------------------------------------------------------------------------
-echo "Test 3: Remote URL without .git suffix"
+echo -e "${BOLD}Test 3: Remote URL without .git suffix${NC}"
 setup_repo "https://gitlab.com/user/another-project"
 
 git checkout -b bugfix/fix-header --quiet
@@ -114,7 +115,7 @@ cleanup_repo
 # --------------------------------------------------------------------------
 # Test 4: Branch name without prefix (no slash)
 # --------------------------------------------------------------------------
-echo "Test 4: Branch name without prefix (no slash)"
+echo -e "${BOLD}Test 4: Branch name without prefix (no slash)${NC}"
 setup_repo "https://gitlab.com/org/repo.git"
 
 git checkout -b update-readme --quiet
@@ -131,7 +132,7 @@ cleanup_repo
 # --------------------------------------------------------------------------
 # Test 5: Single commit with special characters in message
 # --------------------------------------------------------------------------
-echo "Test 5: Single commit - message with special characters"
+echo -e "${BOLD}Test 5: Single commit - message with special characters${NC}"
 setup_repo "https://gitlab.com/team/app.git"
 
 git checkout -b fix/auth-flow --quiet
@@ -147,7 +148,7 @@ cleanup_repo
 # --------------------------------------------------------------------------
 # Test 6: Default branch is "master" instead of "main"
 # --------------------------------------------------------------------------
-echo "Test 6: Default branch is 'master'"
+echo -e "${BOLD}Test 6: Default branch is 'master'${NC}"
 setup_repo "https://gitlab.com/org/legacy-repo.git" "master"
 
 git checkout -b feature/new-thing --quiet
@@ -164,7 +165,7 @@ cleanup_repo
 # --------------------------------------------------------------------------
 # Test 7: Single commit with slash in commit message
 # --------------------------------------------------------------------------
-echo "Test 7: Single commit - message with slash"
+echo -e "${BOLD}Test 7: Single commit - message with slash${NC}"
 setup_repo "https://gitlab.com/org/repo.git"
 
 git checkout -b feature/add-shadcn-ui-mcp-server --quiet
