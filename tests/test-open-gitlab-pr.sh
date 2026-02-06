@@ -25,6 +25,8 @@ setup_repo() {
 	TMPDIR_REPO=$(mktemp -d)
 	cd "$TMPDIR_REPO"
 	git init -b "$default_branch" --quiet
+	git config user.email "test@test.com"
+	git config user.name "Test"
 	git remote add origin "$remote_url"
 	# Set up the symbolic ref so the function can detect the default branch
 	git symbolic-ref "refs/remotes/origin/HEAD" "refs/remotes/origin/$default_branch"
