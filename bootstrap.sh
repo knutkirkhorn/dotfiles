@@ -7,6 +7,8 @@ cp .aliases ~/.aliases
 cp .functions ~/.functions
 cp .bash_profile ~/.bash_profile
 cp global.gitignore ~/.gitignore
+# Used to hide the login message
+cp .hushlogin ~/.hushlogin
 
 # Set global gitignore
 git config --global core.excludesfile ~/.gitignore
