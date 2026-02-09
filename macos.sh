@@ -44,3 +44,6 @@ mas install 6502579523 # Week Number
 mas install 1632827132 # Camera Preview
 mas install 1295203466 # Windows App (for remote desktop)
 mas install 1604176982 # One Thing
+
+# macOS preferences
+defaults write com.apple.finder ShowPathbar -bool true
