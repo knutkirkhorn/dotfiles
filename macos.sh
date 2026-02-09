@@ -27,7 +27,8 @@ brew install --cask \
 	proxyman \
 	git-credential-manager \
 	mockoon \
-	obsidian
+	obsidian \
+	android-platform-tools
 
 # TODO: install node.js
 
