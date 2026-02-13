@@ -75,7 +75,7 @@ git commit --allow-empty -m "Second feature commit" --quiet
 OPENED_URL=""
 open-gitlab-pr
 
-expected="https://gitlab.com/user/my-project/-/merge_requests/new?merge_request%5Bsource_branch%5D=feature/my-cool-feature&merge_request%5Btitle%5D=My%20cool%20feature"
+expected="https://gitlab.com/user/my-project/-/merge_requests/new?merge_request%5Bsource_branch%5D=feature%2Fmy-cool-feature&merge_request%5Btitle%5D=My%20cool%20feature"
 assert_url "URL with title from branch name" "$expected"
 cleanup_repo
 
@@ -91,7 +91,7 @@ git commit --allow-empty -m "Fix the login bug" --quiet
 OPENED_URL=""
 open-gitlab-pr
 
-expected="https://gitlab.com/user/my-project/-/merge_requests/new?merge_request%5Bsource_branch%5D=feature/some-branch&merge_request%5Btitle%5D=Fix%20the%20login%20bug"
+expected="https://gitlab.com/user/my-project/-/merge_requests/new?merge_request%5Bsource_branch%5D=feature%2Fsome-branch&merge_request%5Btitle%5D=Fix%20the%20login%20bug"
 assert_url "URL with title from commit message" "$expected"
 cleanup_repo
 
@@ -108,7 +108,7 @@ git commit --allow-empty -m "Add tests for header" --quiet
 OPENED_URL=""
 open-gitlab-pr
 
-expected="https://gitlab.com/user/another-project/-/merge_requests/new?merge_request%5Bsource_branch%5D=bugfix/fix-header&merge_request%5Btitle%5D=Fix%20header"
+expected="https://gitlab.com/user/another-project/-/merge_requests/new?merge_request%5Bsource_branch%5D=bugfix%2Ffix-header&merge_request%5Btitle%5D=Fix%20header"
 assert_url "URL without .git suffix in remote" "$expected"
 cleanup_repo
 
@@ -141,7 +141,7 @@ git commit --allow-empty -m "Hallå wårld" --quiet
 OPENED_URL=""
 open-gitlab-pr
 
-expected="https://gitlab.com/team/app/-/merge_requests/new?merge_request%5Bsource_branch%5D=fix/auth-flow&merge_request%5Btitle%5D=Hallå%20wårld"
+expected="https://gitlab.com/team/app/-/merge_requests/new?merge_request%5Bsource_branch%5D=fix%2Fauth-flow&merge_request%5Btitle%5D=Hall%C3%A5%20w%C3%A5rld"
 assert_url "URL with commit message containing spaces" "$expected"
 cleanup_repo
 
@@ -158,7 +158,7 @@ git commit --allow-empty -m "Polish new thing" --quiet
 OPENED_URL=""
 open-gitlab-pr
 
-expected="https://gitlab.com/org/legacy-repo/-/merge_requests/new?merge_request%5Bsource_branch%5D=feature/new-thing&merge_request%5Btitle%5D=New%20thing"
+expected="https://gitlab.com/org/legacy-repo/-/merge_requests/new?merge_request%5Bsource_branch%5D=feature%2Fnew-thing&merge_request%5Btitle%5D=New%20thing"
 assert_url "URL with master as default branch" "$expected"
 cleanup_repo
 
@@ -174,8 +174,25 @@ git commit --allow-empty -m "Add shadcn/ui MCP server" --quiet
 OPENED_URL=""
 open-gitlab-pr
 
-expected="https://gitlab.com/org/repo/-/merge_requests/new?merge_request%5Bsource_branch%5D=feature/add-shadcn-ui-mcp-server&merge_request%5Btitle%5D=Add%20shadcn/ui%20MCP%20server"
+expected="https://gitlab.com/org/repo/-/merge_requests/new?merge_request%5Bsource_branch%5D=feature%2Fadd-shadcn-ui-mcp-server&merge_request%5Btitle%5D=Add%20shadcn%2Fui%20MCP%20server"
 assert_url "URL with slash in commit message" "$expected"
+cleanup_repo
+
+# --------------------------------------------------------------------------
+# Test 8: SSH remote URL normalization
+# --------------------------------------------------------------------------
+echo -e "${BOLD}Test 8: SSH remote URL normalization${NC}"
+setup_repo "git@gitlab.com:org/repo.git"
+
+git checkout -b chore/update-deps --quiet
+git commit --allow-empty -m "Update deps" --quiet
+git commit --allow-empty -m "Polish deps update" --quiet
+
+OPENED_URL=""
+open-gitlab-pr
+
+expected="https://gitlab.com/org/repo/-/merge_requests/new?merge_request%5Bsource_branch%5D=chore%2Fupdate-deps&merge_request%5Btitle%5D=Update%20deps"
+assert_url "URL normalized from SSH remote" "$expected"
 cleanup_repo
 
 # --------------------------------------------------------------------------
