@@ -1,11 +1,46 @@
 name: CI
 on:
-    - push
-    - pull_request
+  - push
+  - pull_request
 jobs:
-    tests:
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v4
-            - name: Run tests
-              run: bash tests/test-open-gitlab-pr.sh
+  lint-shell:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install shell lint tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck
+      - name: Bash syntax check
+        run: |
+          files=(
+            ".aliases"
+            ".bash_profile"
+            ".functions"
+            "bootstrap.sh"
+            "brew-update.sh"
+            "macos.sh"
+            "npm.sh"
+            "tests/test-open-gitlab-pr.sh"
+          )
+          for file in "${files[@]}"; do
+            bash -n "$file"
+          done
+      - name: ShellCheck
+        run: |
+          shellcheck \
+            .aliases \
+            .bash_profile \
+            .functions \
+            bootstrap.sh \
+            brew-update.sh \
+            macos.sh \
+            npm.sh \
+            tests/test-open-gitlab-pr.sh
+
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run tests
+        run: bash tests/test-open-gitlab-pr.sh
