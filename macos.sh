@@ -11,7 +11,8 @@ brew install \
 	gitleaks \
 	mas \
 	ffmpeg \
-	mkcert
+	mkcert \
+	shellcheck
 
 # Install Homebrew GUI apps
 brew install --cask \
