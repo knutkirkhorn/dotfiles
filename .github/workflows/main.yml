@@ -29,7 +29,7 @@ jobs:
       - name: ShellCheck
         # TODO: fix these disabled shellcheck errors later
         run: |
-          shellcheck -e SC1090,SC2198,SC2005,SC1091 \
+          shellcheck -e SC1090,SC2198,SC2005 \
             .aliases \
             .bash_profile \
             .functions \

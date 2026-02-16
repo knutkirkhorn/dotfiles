@@ -1,0 +1,17 @@
+---
+description: General coding practices for quality and maintainability
+alwaysApply: true
+---
+
+# General Coding Practices
+
+## Design and Scope
+
+- Keep changes small and task-focused; avoid unrelated refactors.
+- Prefer readable, simple solutions over clever abstractions.
+
+## Code Quality
+
+- Use clear naming for functions, variables, and files.
+- Add brief comments only where intent is non-obvious.
+- Never end a code comment with a period.

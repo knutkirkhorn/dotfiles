@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Test script for the "open-gitlab-pr" function from .functions
-# Uses temporary git repos and mocks `open` to capture the URL.
+# Uses temporary git repos and mocks `open` to capture the URL
 
 set -euo pipefail
 
@@ -22,6 +22,7 @@ open() {
 }
 
 # Source the functions file to get open-gitlab-pr
+# shellcheck disable=SC1091
 source "$SCRIPT_DIR/../.functions"
 
 # Helper to set up a fresh temporary git repo with a remote
