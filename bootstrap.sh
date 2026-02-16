@@ -12,6 +12,11 @@ ln -sf "$DOTFILES_DIR/global.gitignore" "$HOME/.gitignore"
 # Used to hide the login message
 ln -sf "$DOTFILES_DIR/.hushlogin" "$HOME/.hushlogin"
 
+# Copy Cursor rules to home directory
+CURSOR_RULES_DIR="$HOME/.cursor/rules"
+mkdir -p "$CURSOR_RULES_DIR"
+cp "$DOTFILES_DIR/.cursor/rules/general-coding-practices.mdc" "$CURSOR_RULES_DIR/general-coding-practices.mdc"
+
 # Set global gitignore
 git config --global core.excludesfile ~/.gitignore
 
