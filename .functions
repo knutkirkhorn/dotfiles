@@ -118,7 +118,7 @@ function open-gitlab-pr() {
 
 		LC_ALL=C
 		for ((i = 0; i < ${#input}; i++)); do
-			char="${input:i:1}"
+			char="${input:$i:1}"
 			case "$char" in
 			[a-zA-Z0-9.~_-]) output+="$char" ;;
 			*)
