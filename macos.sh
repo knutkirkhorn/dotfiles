@@ -3,10 +3,15 @@
 # Install Homebrew
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
+# Install Zerobrew
+curl -sSL https://zerobrew.rs/install | bash
+
 # Install Homebrew packages
 # jwt-cli (https://github.com/mike-engel/jwt-cli)
 brew install mike-engel/jwt-cli/jwt-cli
-brew install \
+
+# Install Homebrew packages using Zerobrew
+zb install \
 	scrcpy \
 	gitleaks \
 	mas \
