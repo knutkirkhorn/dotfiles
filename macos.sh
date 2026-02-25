@@ -7,8 +7,11 @@
 curl -sSL https://zerobrew.rs/install | bash
 
 # Install Homebrew packages
+# Specific taps
 # jwt-cli (https://github.com/mike-engel/jwt-cli)
 brew install mike-engel/jwt-cli/jwt-cli
+# bun.com (https://github.com/oven-sh/homebrew-bun)
+brew install oven-sh/bun/bun
 
 # Install Homebrew packages using Zerobrew
 zb bundle
