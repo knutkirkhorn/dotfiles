@@ -1,0 +1,6 @@
+brew "scrcpy"
+brew "gitleaks"
+brew "mas"
+brew "ffmpeg"
+brew "mkcert"
+brew "shellcheck"

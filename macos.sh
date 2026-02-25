@@ -11,13 +11,7 @@ curl -sSL https://zerobrew.rs/install | bash
 brew install mike-engel/jwt-cli/jwt-cli
 
 # Install Homebrew packages using Zerobrew
-zb install \
-	scrcpy \
-	gitleaks \
-	mas \
-	ffmpeg \
-	mkcert \
-	shellcheck
+zb bundle
 
 # Install Homebrew GUI apps
 brew install --cask \
