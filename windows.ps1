@@ -4,3 +4,6 @@ winget install --exact --id MartiCliment.UniGetUI --source winget
 # GitHub Desktop (https://desktop.github.com/)
 winget install github-desktop
 
+# CLI Apps
+winget install --id=astral-sh.uv  -e
+
