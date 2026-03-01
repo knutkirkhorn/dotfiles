@@ -7,8 +7,13 @@ winget install github-desktop
 winget install --id "Anysphere.Cursor" --exact --source winget --accept-source-agreements --disable-interactivity --silent --include-unknown --accept-package-agreements --force
 # TablePlus (https://tableplus.com/)
 winget install --id "TablePlus.TablePlus" --exact --source winget --accept-source-agreements --disable-interactivity --silent --include-unknown --accept-package-agreements --force
+winget install -e --id Microsoft.VisualStudioCode
+winget install -e --id Proxyman.Proxyman
+winget install -e --id Obsidian.Obsidian
 
 # CLI Apps
 winget install --id=astral-sh.uv  -e
 # TODO: find if not possible to use the git shipped with GitHub Desktop?
 winget install --id Git.Git -e --source winget
+# scrcpy (https://github.com/Genymobile/scrcpy)
+winget install -e --id Genymobile.scrcpy
