@@ -1,0 +1,6 @@
+---
+description: Working with Python
+alwaysApply: false
+---
+
+When installing Python packages, use `uv` instead of `pip`. Do not include the pip install command.
