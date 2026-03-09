@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-git pull
+git pull --quiet
 
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
