@@ -12,6 +12,15 @@ ln -sf "$DOTFILES_DIR/global.gitignore" "$HOME/.gitignore"
 # Used to hide the login message
 ln -sf "$DOTFILES_DIR/.hushlogin" "$HOME/.hushlogin"
 
+# Symlink ~/.agents to repo .agents when safe
+if [ -e "$HOME/.agents" ] && [ ! -L "$HOME/.agents" ]; then
+	echo "Skipping .agents symlink: $HOME/.agents exists and is not a symlink"
+	echo "Cleanup before continuing..."
+	exit 1
+else
+	ln -sfn "$DOTFILES_DIR/.agents" "$HOME/.agents"
+fi
+
 # Copy Cursor rules to home directory
 CURSOR_RULES_DIR="$HOME/.cursor/rules"
 mkdir -p "$CURSOR_RULES_DIR"
