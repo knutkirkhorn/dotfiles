@@ -26,6 +26,15 @@ CURSOR_RULES_DIR="$HOME/.cursor/rules"
 mkdir -p "$CURSOR_RULES_DIR"
 cp "$DOTFILES_DIR/.cursor/rules/general-coding-practices.mdc" "$CURSOR_RULES_DIR/general-coding-practices.mdc"
 
+# Symlink launchd jobs
+LAUNCH_AGENTS_DIR="$HOME/Library/LaunchAgents"
+mkdir -p "$LAUNCH_AGENTS_DIR"
+ln -sfn "$DOTFILES_DIR/scripts/launchd/com.knut.clickup-init-week.plist" "$LAUNCH_AGENTS_DIR/com.knut.clickup-init-week.plist"
+# Reload launchd jobs
+launchctl unload "$LAUNCH_AGENTS_DIR/com.knut.clickup-init-week.plist" 2>/dev/null
+launchctl load "$LAUNCH_AGENTS_DIR/com.knut.clickup-init-week.plist"
+launchctl start com.knut.clickup-init-week
+
 # Set global gitignore
 git config --global core.excludesfile ~/.gitignore
 
