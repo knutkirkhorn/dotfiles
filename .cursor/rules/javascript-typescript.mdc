@@ -1,0 +1,18 @@
+---
+globs: *.ts,*.js
+alwaysApply: false
+---
+
+When creating a javascript/typescript script that will be run as a command line tool, add this to the main function calls.
+Also keep await not prevent .then & .catch if possible.
+
+```typescript
+if (import.meta.main) {
+	try {
+		await main();
+	} catch (error) {
+		console.error(error);
+		process.exit(1);
+	}
+}
+```
