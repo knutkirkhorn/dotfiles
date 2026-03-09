@@ -1,0 +1,5 @@
+---
+alwaysApply: true
+---
+
+After finishing changes run tests (see /tests/README.md) and apply new changes by running `source bootstrap.sh`.
