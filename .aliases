@@ -54,3 +54,6 @@ alias nju="ncu -i"
 
 # Create Next App with my own template
 alias cna='npx create-next-app@latest -e https://github.com/knutkirkhorn/next-template'
+
+# skills.sh
+alias skills='bunx --bun skills@latest'
