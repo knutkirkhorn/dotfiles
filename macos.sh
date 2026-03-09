@@ -31,7 +31,8 @@ brew install --cask \
 	git-credential-manager \
 	mockoon \
 	obsidian \
-	android-platform-tools
+	android-platform-tools \
+	crystalfetch
 
 # TODO: install node.js
 
