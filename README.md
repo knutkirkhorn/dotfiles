@@ -59,7 +59,7 @@ bun run scripts/init-clickup-week.ts ENET-1149
 
 ### Automation
 
-The launchd job is stored in `scripts/launchd/com.knut.clickup-init-week.plist` and symlinked to `~/Library/LaunchAgents` by `bootstrap.sh`.
+The launchd job is stored in [`scripts/launchd/com.knut.clickup-init-week.plist`](scripts/launchd/com.knut.clickup-init-week.plist) and symlinked to `~/Library/LaunchAgents` by `bootstrap.sh`.
 
 ## Inspiration and thanks
 
