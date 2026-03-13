@@ -16,3 +16,5 @@ if (import.meta.main) {
 	}
 }
 ```
+
+After editing a file, run linting and formatting commands. Usually: "npm run lint" and "npm run format:check"
