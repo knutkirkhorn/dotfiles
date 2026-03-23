@@ -28,7 +28,7 @@ Run this script to install some apps for macOS.
 
 ## ClickUp weekly init
 
-`scripts/init-clickup-week.ts` creates weekday (Mon-Fri) 30m time entries at 09:00 for the configured ClickUp task in the current week.
+`scripts/init-clickup-week.ts` creates weekday (Mon-Fri) 30m time entries at 09:00 for the configured ClickUp task(s) in the current week.
 
 ### Required env vars
 
@@ -37,6 +37,12 @@ Set these in `.env`:
 ```sh
 CLICKUP_API_KEY=...
 CLICKUP_TASK_IDENTIFIER=ENET-1149
+```
+
+For multiple tasks, use a comma-separated list in `CLICKUP_TASK_IDENTIFIERS`, or the same format in `CLICKUP_TASK_IDENTIFIER` (or pass multiple arguments when running manually):
+
+```sh
+CLICKUP_TASK_IDENTIFIERS=ENET-1149,ENET-2001
 ```
 
 Optional:
@@ -51,10 +57,10 @@ CLICKUP_TEAM_ID=...
 bun run scripts/init-clickup-week.ts
 ```
 
-Override task from CLI:
+Override task(s) from CLI (one or more):
 
 ```sh
-bun run scripts/init-clickup-week.ts ENET-1149
+bun run scripts/init-clickup-week.ts ENET-1149 ENET-2001
 ```
 
 ### Automation

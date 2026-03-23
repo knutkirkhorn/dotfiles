@@ -141,11 +141,58 @@ async function getWeekEntries(
 	return response.data ?? [];
 }
 
-function matchesTaskEntry(entry: TimeEntry, taskId: string): boolean {
-	return (
-		entry.task?.id === taskId &&
-		parseInt(entry.duration, 10) === ENTRY_DURATION_MS
+function dedupeIdentifiers(identifiers: string[]): string[] {
+	const seen = new Set<string>();
+	const out: string[] = [];
+	for (const id of identifiers) {
+		if (seen.has(id)) continue;
+		seen.add(id);
+		out.push(id);
+	}
+	return out;
+}
+
+function parseTaskIdentifiers(): string[] {
+	const fromArgv = process.argv.slice(2).filter(Boolean);
+	if (fromArgv.length > 0) {
+		return dedupeIdentifiers(fromArgv);
+	}
+	const fromList = process.env.CLICKUP_TASK_IDENTIFIERS;
+	if (fromList) {
+		return dedupeIdentifiers(
+			fromList
+				.split(",")
+				.map((item) => item.trim())
+				.filter(Boolean),
+		);
+	}
+	const single = process.env.CLICKUP_TASK_IDENTIFIER?.trim();
+	if (!single) {
+		return [];
+	}
+	// Same as CLICKUP_TASK_IDENTIFIERS: allow comma-separated list in one var
+	return dedupeIdentifiers(
+		single.split(",").map((item) => item.trim()).filter(Boolean),
 	);
+}
+
+function buildExistingDaysByTaskId(entries: TimeEntry[]): Map<string, Set<string>> {
+	const byTask = new Map<string, Set<string>>();
+	for (const entry of entries) {
+		const tid = entry.task?.id;
+		if (!tid) continue;
+		if (parseInt(entry.duration, 10) !== ENTRY_DURATION_MS) continue;
+		const dayKey = getDateKey(
+			new Date(Number.parseInt(entry.start, 10)),
+		);
+		let set = byTask.get(tid);
+		if (!set) {
+			set = new Set();
+			byTask.set(tid, set);
+		}
+		set.add(dayKey);
+	}
+	return byTask;
 }
 
 async function createTimeEntry(
@@ -167,12 +214,12 @@ async function createTimeEntry(
 }
 
 async function main() {
-	const taskIdentifier = process.argv[2] ?? process.env.CLICKUP_TASK_IDENTIFIER;
+	const taskIdentifiers = parseTaskIdentifiers();
 	const teamIdFromEnv = process.env.CLICKUP_TEAM_ID;
 
-	if (!taskIdentifier) {
+	if (taskIdentifiers.length === 0) {
 		throw new Error(
-			"Missing task id. Set CLICKUP_TASK_IDENTIFIER in .env or pass a task id as the first argument",
+			"Missing task id(s). Set CLICKUP_TASK_IDENTIFIER or CLICKUP_TASK_IDENTIFIERS in .env, or pass task id(s) as arguments",
 		);
 	}
 
@@ -189,39 +236,50 @@ async function main() {
 		throw new Error(`Could not find team for CLICKUP_TEAM_ID=${teamIdFromEnv}`);
 	}
 
-	const taskId = await resolveTaskId(taskIdentifier, team.id);
 	const existingEntries = await getWeekEntries(team.id, user.id);
-	const existingTaskDays = new Set<string>();
-
-	for (const entry of existingEntries) {
-		if (!matchesTaskEntry(entry, taskId)) continue;
-		const startDate = new Date(Number.parseInt(entry.start, 10));
-		existingTaskDays.add(getDateKey(startDate));
-	}
-
+	const existingByTaskId = buildExistingDaysByTaskId(existingEntries);
 	const weekDays = getCurrentWeekDays();
-	let createdCount = 0;
-	let skippedCount = 0;
 
-	for (const weekDay of weekDays) {
-		const entryDate = new Date(weekDay);
-		entryDate.setHours(ENTRY_START_HOUR, ENTRY_START_MINUTE, 0, 0);
-		const dayKey = getDateKey(entryDate);
-
-		if (existingTaskDays.has(dayKey)) {
-			skippedCount++;
-			continue;
-		}
-
-		await createTimeEntry(team.id, taskId, user.id, entryDate);
-		createdCount++;
-	}
+	let totalCreated = 0;
+	let totalSkipped = 0;
 
 	console.log(`Team: ${team.name} (${team.id})`);
 	console.log(`User: ${user.username} (${user.id})`);
-	console.log(`Task: ${taskIdentifier} -> ${taskId}`);
+
+	for (const taskIdentifier of taskIdentifiers) {
+		const taskId = await resolveTaskId(taskIdentifier, team.id);
+		let existingTaskDays = existingByTaskId.get(taskId);
+		if (!existingTaskDays) {
+			existingTaskDays = new Set();
+			existingByTaskId.set(taskId, existingTaskDays);
+		}
+		let createdCount = 0;
+		let skippedCount = 0;
+
+		for (const weekDay of weekDays) {
+			const entryDate = new Date(weekDay);
+			entryDate.setHours(ENTRY_START_HOUR, ENTRY_START_MINUTE, 0, 0);
+			const dayKey = getDateKey(entryDate);
+
+			if (existingTaskDays.has(dayKey)) {
+				skippedCount++;
+				continue;
+			}
+
+			await createTimeEntry(team.id, taskId, user.id, entryDate);
+			existingTaskDays.add(dayKey);
+			createdCount++;
+		}
+
+		totalCreated += createdCount;
+		totalSkipped += skippedCount;
+		console.log(
+			`Task: ${taskIdentifier} -> ${taskId}: created ${createdCount}, skipped ${skippedCount} existing`,
+		);
+	}
+
 	console.log(
-		`Created ${createdCount} entries, skipped ${skippedCount} existing`,
+		`Total: created ${totalCreated} entries, skipped ${totalSkipped} existing`,
 	);
 }
 
