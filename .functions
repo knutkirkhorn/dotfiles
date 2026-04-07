@@ -63,6 +63,10 @@ function sqlpretty() {
 	echo "$(pbpaste | tr -d '\n' | sed 's/\\"/"/g')" | pbcopy
 }
 
+function base64decode() {
+	printf '%s' "$1" | base64 -D
+}
+
 function update-shadcn-components() {
 	# Check if components/ui directory exists
 	if [ ! -d "components/ui" ]; then
