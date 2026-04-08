@@ -20,7 +20,8 @@ jobs:
             "bootstrap.sh"
             "brew-update.sh"
             "macos.sh"
-            "npm.sh"
+            "npm/npm.sh"
+            "npm/npm-security-hardening.sh"
             "tests/test-open-gitlab-pr.sh"
           )
           for file in "${files[@]}"; do
@@ -36,7 +37,8 @@ jobs:
             bootstrap.sh \
             brew-update.sh \
             macos.sh \
-            npm.sh \
+            npm/npm.sh \
+            npm/npm-security-hardening.sh \
             tests/test-open-gitlab-pr.sh
 
   tests:

@@ -12,10 +12,18 @@ source bootstrap.sh
 
 ### npm
 
-Run this script to install some CLIs.
+Scripts live under [`npm/`](npm/).
+
+Run [`npm/npm.sh`](npm/npm.sh) to install global npm CLIs.
 
 ```sh
-./npm.sh
+./npm/npm.sh
+```
+
+[`npm/npm-security-hardening.sh`](npm/npm-security-hardening.sh) sets minimum release age for npm, pnpm, Yarn, and Bun (supply-chain hardening).
+
+```sh
+./npm/npm-security-hardening.sh
 ```
 
 ### macOS
