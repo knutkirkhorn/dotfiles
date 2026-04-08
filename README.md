@@ -34,6 +34,14 @@ Run this script to install some apps for macOS.
 ./macos.sh
 ```
 
+Touch ID for `sudo`: the PAM snippet lives in [`macos/pam.d/sudo_local`](macos/pam.d/sudo_local). Install or refresh it on a Mac with:
+
+```sh
+./macos/sync-sudo-touchid.sh
+```
+
+This copies that file to `/etc/pam.d/sudo_local` (requires `sudo`). Your OS `/etc/pam.d/sudo` must include `sudo_local` (current macOS does by default).
+
 ## ClickUp weekly init
 
 `scripts/init-clickup-week.ts` creates weekday (Mon-Fri) 30m time entries at 09:00 for the configured ClickUp task(s) in the current week.

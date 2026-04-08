@@ -1,0 +1,3 @@
+# sudo: auth account password session
+# Touch ID for sudo; merged via `auth include sudo_local` in /etc/pam.d/sudo
+auth       sufficient     pam_tid.so
