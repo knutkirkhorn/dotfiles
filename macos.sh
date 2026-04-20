@@ -34,8 +34,6 @@ brew install --cask \
 	android-platform-tools \
 	crystalfetch
 
-# TODO: install node.js
-
 # Install Bun
 curl -fsSL https://bun.sh/install | bash
 
