@@ -47,8 +47,7 @@ fi
 
 {
 	printf '# Raycast extensions (%d) exported %s\n' "$count" "$(date '+%Y-%m-%d %H:%M:%S')"
-	printf '# Open each URL to install on a new machine, e.g.:\n'
-	printf '#   grep -v "^#" %s | xargs -n1 open\n\n' "$OUTPUT_FILE"
+	printf '# Reinstall extensions by running `raycast/install-extensions.sh`.\n\n'
 	cat "$tmp_file"
 } >"$OUTPUT_FILE"
 

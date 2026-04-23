@@ -1,6 +1,5 @@
-# Raycast extensions (12) exported 2026-04-22 13:09:08
-# Open each URL to install on a new machine, e.g.:
-#   grep -v "^#" /Users/knutkirkhorn/dev/dotfiles/raycast/extensions.txt | xargs -n1 open
+# Raycast extensions (15) exported 2026-04-23 14:04:23
+# Reinstall extensions by running `raycast/install-extensions.sh`.
 
 # Google Translate (translate)
 https://www.raycast.com/gebeto/translate
@@ -8,6 +7,8 @@ https://www.raycast.com/gebeto/translate
 https://www.raycast.com/aparandeh/manage-clickup-tasks
 # Toothpick (toothpick)
 https://www.raycast.com/VladCuciureanu/toothpick
+# Clean Keyboard (clean-keyboard)
+https://www.raycast.com/ike-gg/clean-keyboard
 # ray.so (ray-so)
 https://www.raycast.com/garrett/ray-so
 # Spotify Player (spotify-player)
@@ -24,5 +25,9 @@ https://www.raycast.com/mooxl/coffee
 https://www.raycast.com/sven/microsoft-teams-calling
 # Unix Timestamp (unix-timestamp)
 https://www.raycast.com/destiner/unix-timestamp
+# Skills (skills)
+https://www.raycast.com/keito4/skills
+# GitHub Repository Search (github-repository-search)
+https://www.raycast.com/thomas/github-repository-search
 # Search npm Packages (search-npm)
 https://www.raycast.com/mrmartineau/search-npm
