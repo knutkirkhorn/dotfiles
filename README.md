@@ -91,6 +91,24 @@ bun run scripts/init-clickup-week.ts ENET-1149 ENET-2001
 
 The launchd job is stored in [`scripts/launchd/com.knut.clickup-init-week.plist`](scripts/launchd/com.knut.clickup-init-week.plist) and symlinked to `~/Library/LaunchAgents` by `bootstrap.sh`.
 
+## Teams Norwegian holiday Out of Office
+
+`scripts/teams-norwegian-holidays-ics-generator.ts` finds Norwegian public holidays with `date-holidays` and writes an `.ics` calendar file with all-day out-of-office events.
+
+Preview the events:
+
+```sh
+bun run teams:out-of-office --year 2026
+```
+
+Create an `.ics` file for Teams/Outlook import:
+
+```sh
+bun run teams:out-of-office --year 2026 --ics norwegian-holidays-2026.ics
+```
+
+Import it by dragging and dropping the `.ics` file into Teams, then select the regular calendar to import it into your calendar. The `.ics` file includes Outlook-specific `X-MICROSOFT-CDO-BUSYSTATUS:OOF`, but the final "show as" value depends on how Teams/Outlook imports the file.
+
 ## Inspiration and thanks
 
 - [Mathias Bynens](https://github.com/mathiasbynens/dotfiles)
