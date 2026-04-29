@@ -32,7 +32,8 @@ brew install --cask \
 	mockoon \
 	obsidian \
 	android-platform-tools \
-	crystalfetch
+	crystalfetch \
+	stats
 
 # Install Bun
 curl -fsSL https://bun.sh/install | bash
