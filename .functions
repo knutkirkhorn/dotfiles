@@ -64,7 +64,7 @@ function sqlpretty() {
 }
 
 function base64decode() {
-	printf '%s' "$1" | base64 -D
+	printf '%s' "$1" | base64 -d
 }
 
 function update-shadcn-components() {
