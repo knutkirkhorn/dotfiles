@@ -1,13 +1,12 @@
 #!/usr/bin/env bun
+import {mkdir, writeFile} from 'node:fs/promises';
+import {dirname} from 'node:path';
+import process from 'node:process';
+import Holidays, {type HolidaysTypes} from 'date-holidays';
 
-import Holidays, { type HolidaysTypes } from "date-holidays";
-import { mkdir, writeFile } from "node:fs/promises";
-import { dirname } from "node:path";
-import process from "node:process";
-
-const DEFAULT_HOLIDAY_TIME_ZONE = "Europe/Oslo";
-const DEFAULT_SUBJECT_PREFIX = "Out of office";
-const SCRIPT_PATH = "scripts/teams-norwegian-holidays-ics-generator.ts";
+const DEFAULT_HOLIDAY_TIME_ZONE = 'Europe/Oslo';
+const DEFAULT_SUBJECT_PREFIX = 'Out of office';
+const SCRIPT_PATH = 'scripts/teams-norwegian-holidays-ics-generator.ts';
 
 interface CliOptions {
 	holidayTimeZone: string;
@@ -35,28 +34,28 @@ function parseArgs(argv: string[]): CliOptions {
 		const next = argv[index + 1];
 
 		switch (arg) {
-			case "--ics":
-				if (!next) throw new Error("Missing value for --ics");
+			case '--ics':
+				if (!next) throw new Error('Missing value for --ics');
 				options.icsPath = next;
 				index++;
 				break;
-			case "--year":
-				if (!next) throw new Error("Missing value for --year");
+			case '--year':
+				if (!next) throw new Error('Missing value for --year');
 				options.year = parseYear(next);
 				index++;
 				break;
-			case "--holiday-timezone":
-				if (!next) throw new Error("Missing value for --holiday-timezone");
+			case '--holiday-timezone':
+				if (!next) throw new Error('Missing value for --holiday-timezone');
 				options.holidayTimeZone = next;
 				index++;
 				break;
-			case "--subject-prefix":
-				if (!next) throw new Error("Missing value for --subject-prefix");
+			case '--subject-prefix':
+				if (!next) throw new Error('Missing value for --subject-prefix');
 				options.subjectPrefix = next;
 				index++;
 				break;
-			case "--help":
-			case "-h":
+			case '--help':
+			case '-h':
 				printHelp();
 				process.exit(0);
 			default:
@@ -97,15 +96,15 @@ function getNorwegianPublicHolidays(
 	year: number,
 	timeZone: string,
 ): HolidayDay[] {
-	const holidays = new Holidays("NO", {
-		languages: ["no", "en"],
+	const holidays = new Holidays('NO', {
+		languages: ['no', 'en'],
 		timezone: timeZone,
-		types: ["public"],
+		types: ['public'],
 	});
 
 	const byDate = new Map<string, Set<string>>();
-	for (const holiday of holidays.getHolidays(year, "no")) {
-		if (holiday.type !== "public") continue;
+	for (const holiday of holidays.getHolidays(year, 'no')) {
+		if (holiday.type !== 'public') continue;
 		const date = getHolidayDate(holiday);
 		let names = byDate.get(date);
 		if (!names) {
@@ -119,7 +118,7 @@ function getNorwegianPublicHolidays(
 		.map(([date, names]) => ({
 			date,
 			names: [...names].sort((first, second) =>
-				first.localeCompare(second, "no"),
+				first.localeCompare(second, 'no'),
 			),
 		}))
 		.sort((first, second) => first.date.localeCompare(second.date));
@@ -136,7 +135,7 @@ function addDays(date: string, days: number): string {
 }
 
 function buildSubject(holiday: HolidayDay, subjectPrefix: string): string {
-	return `${subjectPrefix}: ${holiday.names.join(" / ")}`;
+	return `${subjectPrefix}: ${holiday.names.join(' / ')}`;
 }
 
 async function writeIcsFile(
@@ -144,25 +143,25 @@ async function writeIcsFile(
 	options: CliOptions,
 	path: string,
 ): Promise<void> {
-	await mkdir(dirname(path), { recursive: true });
-	await writeFile(path, buildIcsCalendar(holidays, options), "utf8");
+	await mkdir(dirname(path), {recursive: true});
+	await writeFile(path, buildIcsCalendar(holidays, options), 'utf8');
 }
 
 function buildIcsCalendar(holidays: HolidayDay[], options: CliOptions): string {
 	const lines = [
-		"BEGIN:VCALENDAR",
-		"VERSION:2.0",
-		"PRODID:-//dotfiles//Norwegian Holidays Out Of Office//EN",
-		"CALSCALE:GREGORIAN",
-		"METHOD:PUBLISH",
+		'BEGIN:VCALENDAR',
+		'VERSION:2.0',
+		'PRODID:-//dotfiles//Norwegian Holidays Out Of Office//EN',
+		'CALSCALE:GREGORIAN',
+		'METHOD:PUBLISH',
 	];
 
 	for (const holiday of holidays) {
 		lines.push(...buildIcsEvent(holiday, options));
 	}
 
-	lines.push("END:VCALENDAR");
-	return `${lines.map(foldIcsLine).join("\r\n")}\r\n`;
+	lines.push('END:VCALENDAR');
+	return `${lines.map(foldIcsLine).join('\r\n')}\r\n`;
 }
 
 function buildIcsEvent(holiday: HolidayDay, options: CliOptions): string[] {
@@ -170,39 +169,39 @@ function buildIcsEvent(holiday: HolidayDay, options: CliOptions): string[] {
 	const description = `Created by dotfiles ${SCRIPT_PATH}`;
 
 	return [
-		"BEGIN:VEVENT",
+		'BEGIN:VEVENT',
 		`UID:dotfiles-norwegian-holiday-out-of-office-${holiday.date}@knutkirkhorn.com`,
 		`DTSTAMP:${formatIcsTimestamp(new Date())}`,
 		`DTSTART;VALUE=DATE:${formatIcsDate(holiday.date)}`,
 		`DTEND;VALUE=DATE:${formatIcsDate(addDays(holiday.date, 1))}`,
 		`SUMMARY:${escapeIcsText(subject)}`,
 		`DESCRIPTION:${escapeIcsText(description)}`,
-		"TRANSP:OPAQUE",
-		"STATUS:CONFIRMED",
-		"X-MICROSOFT-CDO-ALLDAYEVENT:TRUE",
-		"X-MICROSOFT-CDO-BUSYSTATUS:OOF",
-		"END:VEVENT",
+		'TRANSP:OPAQUE',
+		'STATUS:CONFIRMED',
+		'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
+		'X-MICROSOFT-CDO-BUSYSTATUS:OOF',
+		'END:VEVENT',
 	];
 }
 
 function formatIcsDate(date: string): string {
-	return date.replaceAll("-", "");
+	return date.replaceAll('-', '');
 }
 
 function formatIcsTimestamp(date: Date): string {
 	return date
 		.toISOString()
-		.replaceAll("-", "")
-		.replaceAll(":", "")
-		.replace(/\.\d{3}Z$/, "Z");
+		.replaceAll('-', '')
+		.replaceAll(':', '')
+		.replace(/\.\d{3}Z$/, 'Z');
 }
 
 function escapeIcsText(value: string): string {
 	return value
-		.replaceAll("\\", "\\\\")
-		.replaceAll(";", "\\;")
-		.replaceAll(",", "\\,")
-		.replaceAll("\n", "\\n");
+		.replaceAll('\\', '\\\\')
+		.replaceAll(';', '\\;')
+		.replaceAll(',', '\\,')
+		.replaceAll('\n', '\\n');
 }
 
 function foldIcsLine(line: string): string {
@@ -216,7 +215,7 @@ function foldIcsLine(line: string): string {
 		rest = rest.slice(maxLength);
 	}
 	chunks.push(rest);
-	return chunks.join("\r\n ");
+	return chunks.join('\r\n ');
 }
 
 function printPlan(holidays: HolidayDay[], options: CliOptions): void {
@@ -231,7 +230,7 @@ function printPlan(holidays: HolidayDay[], options: CliOptions): void {
 function printImportInstructions(path: string): void {
 	console.log(`\nWrote ICS file: ${path}`);
 	console.log(
-		"Import it by dragging and dropping the .ics file into Teams, then select the regular calendar to import it into your calendar.",
+		'Import it by dragging and dropping the .ics file into Teams, then select the regular calendar to import it into your calendar.',
 	);
 }
 
@@ -245,7 +244,7 @@ async function main() {
 	printPlan(holidays, options);
 
 	if (!options.icsPath) {
-		console.log("\nPass --ics <path> to write an importable calendar file.");
+		console.log('\nPass --ics <path> to write an importable calendar file.');
 		return;
 	}
 

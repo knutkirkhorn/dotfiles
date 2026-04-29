@@ -8,7 +8,7 @@ declare const process: {
 	exit(code?: number): never;
 };
 
-const CLICKUP_API_BASE = "https://api.clickup.com/api/v2";
+const CLICKUP_API_BASE = 'https://api.clickup.com/api/v2';
 const ENTRY_DURATION_MS = 30 * 60 * 1000;
 const ENTRY_START_HOUR = 9;
 const ENTRY_START_MINUTE = 0;
@@ -44,7 +44,7 @@ interface TimeEntriesResponse {
 function getApiKey(): string {
 	const apiKey = process.env.CLICKUP_API_KEY;
 	if (!apiKey) {
-		console.error("Missing CLICKUP_API_KEY in environment");
+		console.error('Missing CLICKUP_API_KEY in environment');
 		process.exit(1);
 	}
 	return apiKey;
@@ -58,7 +58,7 @@ async function clickupRequest<T>(
 		...init,
 		headers: {
 			Authorization: getApiKey(),
-			"Content-Type": "application/json",
+			'Content-Type': 'application/json',
 			...(init?.headers ?? {}),
 		},
 	});
@@ -74,12 +74,12 @@ async function clickupRequest<T>(
 }
 
 async function getAuthorizedUser(): Promise<ClickUpUser> {
-	const response = await clickupRequest<{ user: ClickUpUser }>("/user");
+	const response = await clickupRequest<{user: ClickUpUser}>('/user');
 	return response.user;
 }
 
 async function getTeams(): Promise<Team[]> {
-	const response = await clickupRequest<{ teams: Team[] }>("/team");
+	const response = await clickupRequest<{teams: Team[]}>('/team');
 	return response.teams;
 }
 
@@ -120,8 +120,8 @@ function getCurrentWeekDays(): Date[] {
 
 function getDateKey(value: Date): string {
 	const year = value.getFullYear();
-	const month = String(value.getMonth() + 1).padStart(2, "0");
-	const day = String(value.getDate()).padStart(2, "0");
+	const month = String(value.getMonth() + 1).padStart(2, '0');
+	const day = String(value.getDate()).padStart(2, '0');
 	return `${year}-${month}-${day}`;
 }
 
@@ -161,8 +161,8 @@ function parseTaskIdentifiers(): string[] {
 	if (fromList) {
 		return dedupeIdentifiers(
 			fromList
-				.split(",")
-				.map((item) => item.trim())
+				.split(',')
+				.map(item => item.trim())
 				.filter(Boolean),
 		);
 	}
@@ -172,19 +172,22 @@ function parseTaskIdentifiers(): string[] {
 	}
 	// Same as CLICKUP_TASK_IDENTIFIERS: allow comma-separated list in one var
 	return dedupeIdentifiers(
-		single.split(",").map((item) => item.trim()).filter(Boolean),
+		single
+			.split(',')
+			.map(item => item.trim())
+			.filter(Boolean),
 	);
 }
 
-function buildExistingDaysByTaskId(entries: TimeEntry[]): Map<string, Set<string>> {
+function buildExistingDaysByTaskId(
+	entries: TimeEntry[],
+): Map<string, Set<string>> {
 	const byTask = new Map<string, Set<string>>();
 	for (const entry of entries) {
 		const tid = entry.task?.id;
 		if (!tid) continue;
 		if (parseInt(entry.duration, 10) !== ENTRY_DURATION_MS) continue;
-		const dayKey = getDateKey(
-			new Date(Number.parseInt(entry.start, 10)),
-		);
+		const dayKey = getDateKey(new Date(Number.parseInt(entry.start, 10)));
 		let set = byTask.get(tid);
 		if (!set) {
 			set = new Set();
@@ -202,7 +205,7 @@ async function createTimeEntry(
 	start: Date,
 ): Promise<void> {
 	await clickupRequest(`/team/${teamId}/time_entries`, {
-		method: "POST",
+		method: 'POST',
 		body: JSON.stringify({
 			start: start.getTime().toString(),
 			duration: ENTRY_DURATION_MS.toString(),
@@ -219,17 +222,17 @@ async function main() {
 
 	if (taskIdentifiers.length === 0) {
 		throw new Error(
-			"Missing task id(s). Set CLICKUP_TASK_IDENTIFIER or CLICKUP_TASK_IDENTIFIERS in .env, or pass task id(s) as arguments",
+			'Missing task id(s). Set CLICKUP_TASK_IDENTIFIER or CLICKUP_TASK_IDENTIFIERS in .env, or pass task id(s) as arguments',
 		);
 	}
 
 	const [user, teams] = await Promise.all([getAuthorizedUser(), getTeams()]);
 	if (teams.length === 0) {
-		throw new Error("No ClickUp teams available for current account");
+		throw new Error('No ClickUp teams available for current account');
 	}
 
 	const team = teamIdFromEnv
-		? teams.find((item) => item.id === teamIdFromEnv)
+		? teams.find(item => item.id === teamIdFromEnv)
 		: teams[0];
 
 	if (!team) {
