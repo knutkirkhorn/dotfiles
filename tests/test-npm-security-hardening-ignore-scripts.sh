@@ -76,6 +76,13 @@ install_with_manager() {
 		yarn)
 			(
 				cd "$project"
+				if [ "$allow_scripts" = "true" ]; then
+					if [[ "$(yarn --version 2>/dev/null || true)" == 1.* ]]; then
+						printf 'ignore-scripts false\n' >.yarnrc
+					else
+						printf 'enableScripts: true\n' >.yarnrc.yml
+					fi
+				fi
 				run_with_home "$home" yarn add "$PACKAGE" --non-interactive --cache-folder "$CACHE_ROOT/$cache_name"
 			)
 			;;
