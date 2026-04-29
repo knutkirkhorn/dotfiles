@@ -59,3 +59,12 @@ jobs:
           bash tests/test-open-gitlab-pr.sh
           bash tests/test-base64decode.sh
           bash tests/test-npm-security-hardening-ignore-scripts.sh
+
+  lint-javascript:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: oven-sh/setup-bun@v2
+      - run: bun ci
+      - run: bun lint
+      - run: bun format:check
