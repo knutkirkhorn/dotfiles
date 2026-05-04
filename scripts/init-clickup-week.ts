@@ -141,59 +141,44 @@ async function getWeekEntries(
 	return response.data ?? [];
 }
 
-function dedupeIdentifiers(identifiers: string[]): string[] {
-	const seen = new Set<string>();
-	const out: string[] = [];
-	for (const id of identifiers) {
-		if (seen.has(id)) continue;
-		seen.add(id);
-		out.push(id);
-	}
-	return out;
-}
-
 function parseTaskIdentifiers(): string[] {
 	const fromArgv = process.argv.slice(2).filter(Boolean);
 	if (fromArgv.length > 0) {
-		return dedupeIdentifiers(fromArgv);
+		return fromArgv;
 	}
 	const fromList = process.env.CLICKUP_TASK_IDENTIFIERS;
 	if (fromList) {
-		return dedupeIdentifiers(
-			fromList
-				.split(',')
-				.map(item => item.trim())
-				.filter(Boolean),
-		);
+		return fromList
+			.split(',')
+			.map(item => item.trim())
+			.filter(Boolean);
 	}
 	const single = process.env.CLICKUP_TASK_IDENTIFIER?.trim();
 	if (!single) {
 		return [];
 	}
 	// Same as CLICKUP_TASK_IDENTIFIERS: allow comma-separated list in one var
-	return dedupeIdentifiers(
-		single
-			.split(',')
-			.map(item => item.trim())
-			.filter(Boolean),
-	);
+	return single
+		.split(',')
+		.map(item => item.trim())
+		.filter(Boolean);
 }
 
-function buildExistingDaysByTaskId(
+function buildExistingCountsByTaskId(
 	entries: TimeEntry[],
-): Map<string, Set<string>> {
-	const byTask = new Map<string, Set<string>>();
+): Map<string, Map<string, number>> {
+	const byTask = new Map<string, Map<string, number>>();
 	for (const entry of entries) {
 		const tid = entry.task?.id;
 		if (!tid) continue;
 		if (parseInt(entry.duration, 10) !== ENTRY_DURATION_MS) continue;
 		const dayKey = getDateKey(new Date(Number.parseInt(entry.start, 10)));
-		let set = byTask.get(tid);
-		if (!set) {
-			set = new Set();
-			byTask.set(tid, set);
+		let dayCounts = byTask.get(tid);
+		if (!dayCounts) {
+			dayCounts = new Map();
+			byTask.set(tid, dayCounts);
 		}
-		set.add(dayKey);
+		dayCounts.set(dayKey, (dayCounts.get(dayKey) ?? 0) + 1);
 	}
 	return byTask;
 }
@@ -240,49 +225,74 @@ async function main() {
 	}
 
 	const existingEntries = await getWeekEntries(team.id, user.id);
-	const existingByTaskId = buildExistingDaysByTaskId(existingEntries);
+	const existingByTaskId = buildExistingCountsByTaskId(existingEntries);
 	const weekDays = getCurrentWeekDays();
+	const taskCountsById = new Map<
+		string,
+		{identifiers: Set<string>; desiredCount: number}
+	>();
+	const resolvedTaskIdsByIdentifier = new Map<string, string>();
 
 	let totalCreated = 0;
-	let totalSkipped = 0;
+	let totalExistingBefore = 0;
+	let totalTarget = 0;
 
 	console.log(`Team: ${team.name} (${team.id})`);
 	console.log(`User: ${user.username} (${user.id})`);
 
 	for (const taskIdentifier of taskIdentifiers) {
-		const taskId = await resolveTaskId(taskIdentifier, team.id);
-		let existingTaskDays = existingByTaskId.get(taskId);
-		if (!existingTaskDays) {
-			existingTaskDays = new Set();
-			existingByTaskId.set(taskId, existingTaskDays);
+		let taskId = resolvedTaskIdsByIdentifier.get(taskIdentifier);
+		if (!taskId) {
+			taskId = await resolveTaskId(taskIdentifier, team.id);
+			resolvedTaskIdsByIdentifier.set(taskIdentifier, taskId);
 		}
+
+		const taskCount = taskCountsById.get(taskId);
+		if (taskCount) {
+			taskCount.identifiers.add(taskIdentifier);
+			taskCount.desiredCount++;
+			continue;
+		}
+		taskCountsById.set(taskId, {
+			identifiers: new Set([taskIdentifier]),
+			desiredCount: 1,
+		});
+	}
+
+	for (const [taskId, taskCount] of taskCountsById) {
+		const existingTaskDays =
+			existingByTaskId.get(taskId) ?? new Map<string, number>();
 		let createdCount = 0;
-		let skippedCount = 0;
+		let existingBeforeCount = 0;
 
 		for (const weekDay of weekDays) {
 			const entryDate = new Date(weekDay);
 			entryDate.setHours(ENTRY_START_HOUR, ENTRY_START_MINUTE, 0, 0);
 			const dayKey = getDateKey(entryDate);
+			const existingCount = existingTaskDays.get(dayKey) ?? 0;
+			const missingCount = Math.max(taskCount.desiredCount - existingCount, 0);
 
-			if (existingTaskDays.has(dayKey)) {
-				skippedCount++;
-				continue;
+			existingBeforeCount += Math.min(existingCount, taskCount.desiredCount);
+
+			for (let i = 0; i < missingCount; i++) {
+				await createTimeEntry(team.id, taskId, user.id, entryDate);
+				createdCount++;
 			}
-
-			await createTimeEntry(team.id, taskId, user.id, entryDate);
-			existingTaskDays.add(dayKey);
-			createdCount++;
+			existingTaskDays.set(dayKey, existingCount + missingCount);
 		}
 
+		const targetCount = taskCount.desiredCount * weekDays.length;
 		totalCreated += createdCount;
-		totalSkipped += skippedCount;
+		totalExistingBefore += existingBeforeCount;
+		totalTarget += targetCount;
+		const identifiers = [...taskCount.identifiers].join(', ');
 		console.log(
-			`Task: ${taskIdentifier} -> ${taskId}: created ${createdCount}, skipped ${skippedCount} existing`,
+			`Task: ${identifiers} -> ${taskId} x${taskCount.desiredCount}: target ${targetCount}, existing before run ${existingBeforeCount}, created this run ${createdCount}`,
 		);
 	}
 
 	console.log(
-		`Total: created ${totalCreated} entries, skipped ${totalSkipped} existing`,
+		`Total: target ${totalTarget} entries, existing before run ${totalExistingBefore}, created this run ${totalCreated}`,
 	);
 }
 
