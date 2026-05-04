@@ -87,6 +87,12 @@ Override task(s) from CLI (one or more):
 bun run scripts/init-clickup-week.ts ENET-1149 ENET-2001
 ```
 
+Preview what would be created without writing time entries:
+
+```sh
+bun run scripts/init-clickup-week.ts --dry-run
+```
+
 ### Automation
 
 The launchd job is stored in [`scripts/launchd/com.knut.clickup-init-week.plist`](scripts/launchd/com.knut.clickup-init-week.plist) and symlinked to `~/Library/LaunchAgents` by `bootstrap.sh`.

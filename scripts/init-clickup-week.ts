@@ -12,6 +12,7 @@ const CLICKUP_API_BASE = 'https://api.clickup.com/api/v2';
 const ENTRY_DURATION_MS = 30 * 60 * 1000;
 const ENTRY_START_HOUR = 9;
 const ENTRY_START_MINUTE = 0;
+const DRY_RUN_FLAG = '--dry-run';
 
 interface ClickUpUser {
 	id: number;
@@ -142,7 +143,10 @@ async function getWeekEntries(
 }
 
 function parseTaskIdentifiers(): string[] {
-	const fromArgv = process.argv.slice(2).filter(Boolean);
+	const fromArgv = process.argv
+		.slice(2)
+		.filter(arg => arg !== DRY_RUN_FLAG)
+		.filter(Boolean);
 	if (fromArgv.length > 0) {
 		return fromArgv;
 	}
@@ -162,6 +166,10 @@ function parseTaskIdentifiers(): string[] {
 		.split(',')
 		.map(item => item.trim())
 		.filter(Boolean);
+}
+
+function isDryRun(): boolean {
+	return process.argv.slice(2).includes(DRY_RUN_FLAG);
 }
 
 function buildExistingCountsByTaskId(
@@ -204,6 +212,7 @@ async function createTimeEntry(
 async function main() {
 	const taskIdentifiers = parseTaskIdentifiers();
 	const teamIdFromEnv = process.env.CLICKUP_TEAM_ID;
+	const dryRun = isDryRun();
 
 	if (taskIdentifiers.length === 0) {
 		throw new Error(
@@ -239,6 +248,9 @@ async function main() {
 
 	console.log(`Team: ${team.name} (${team.id})`);
 	console.log(`User: ${user.username} (${user.id})`);
+	if (dryRun) {
+		console.log('Dry run: no ClickUp time entries will be created');
+	}
 
 	for (const taskIdentifier of taskIdentifiers) {
 		let taskId = resolvedTaskIdsByIdentifier.get(taskIdentifier);
@@ -275,10 +287,14 @@ async function main() {
 			existingBeforeCount += Math.min(existingCount, taskCount.desiredCount);
 
 			for (let i = 0; i < missingCount; i++) {
-				await createTimeEntry(team.id, taskId, user.id, entryDate);
+				if (!dryRun) {
+					await createTimeEntry(team.id, taskId, user.id, entryDate);
+				}
 				createdCount++;
 			}
-			existingTaskDays.set(dayKey, existingCount + missingCount);
+			if (!dryRun) {
+				existingTaskDays.set(dayKey, existingCount + missingCount);
+			}
 		}
 
 		const targetCount = taskCount.desiredCount * weekDays.length;
@@ -286,13 +302,15 @@ async function main() {
 		totalExistingBefore += existingBeforeCount;
 		totalTarget += targetCount;
 		const identifiers = [...taskCount.identifiers].join(', ');
+		const createLabel = dryRun ? 'would create' : 'created this run';
 		console.log(
-			`Task: ${identifiers} -> ${taskId} x${taskCount.desiredCount}: target ${targetCount}, existing before run ${existingBeforeCount}, created this run ${createdCount}`,
+			`Task: ${identifiers} -> ${taskId} x${taskCount.desiredCount}: target ${targetCount}, existing before run ${existingBeforeCount}, ${createLabel} ${createdCount}`,
 		);
 	}
 
+	const totalCreateLabel = dryRun ? 'would create' : 'created this run';
 	console.log(
-		`Total: target ${totalTarget} entries, existing before run ${totalExistingBefore}, created this run ${totalCreated}`,
+		`Total: target ${totalTarget} entries, existing before run ${totalExistingBefore}, ${totalCreateLabel} ${totalCreated}`,
 	);
 }
 
