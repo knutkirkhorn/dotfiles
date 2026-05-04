@@ -20,6 +20,7 @@ jobs:
             "bootstrap.sh"
             "brew-update.sh"
             "macos.sh"
+            "test.sh"
             "npm/npm.sh"
             "npm/npm-security-hardening.sh"
             "tests/test-base64decode.sh"
@@ -39,6 +40,7 @@ jobs:
             bootstrap.sh \
             brew-update.sh \
             macos.sh \
+            test.sh \
             npm/npm.sh \
             npm/npm-security-hardening.sh \
             tests/test-base64decode.sh \
@@ -55,10 +57,7 @@ jobs:
       - name: Install package managers
         run: npm install -g pnpm yarn bun
       - name: Run tests
-        run: |
-          bash tests/test-open-gitlab-pr.sh
-          bash tests/test-base64decode.sh
-          bash tests/test-npm-security-hardening-ignore-scripts.sh
+        run: bash test.sh
 
   lint-javascript:
     runs-on: ubuntu-latest

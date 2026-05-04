@@ -7,6 +7,10 @@ Tests for shell functions defined in the dotfiles.
 Run all tests from the repository root:
 
 ```sh
+bash test.sh
+
+# Or individually:
+
 bash tests/test-open-gitlab-pr.sh
 bash tests/test-base64decode.sh
 bash tests/test-npm-security-hardening-ignore-scripts.sh
