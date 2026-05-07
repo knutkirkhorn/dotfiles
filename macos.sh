@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
 # Install Homebrew
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -53,3 +54,5 @@ mas install 1604176982 # One Thing
 
 # macOS preferences
 defaults write com.apple.finder ShowPathbar -bool true
+
+echo "✔︎ Completed macOS setup"
