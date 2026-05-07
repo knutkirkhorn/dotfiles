@@ -2,13 +2,31 @@
 
 git pull --quiet
 
-DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BOOTSTRAP_PATH="${BASH_SOURCE[0]:-}"
+if [ -n "${ZSH_VERSION:-}" ]; then
+	BOOTSTRAP_PATH="${(%):-%x}"
+fi
+DOTFILES_DIR="$(cd "$(dirname "$BOOTSTRAP_PATH")" && pwd)"
 
 # Symlink files to ~
 ln -sf "$DOTFILES_DIR/.aliases" "$HOME/.aliases"
 ln -sf "$DOTFILES_DIR/.functions" "$HOME/.functions"
 ln -sf "$DOTFILES_DIR/.bash_profile" "$HOME/.bash_profile"
 ln -sf "$DOTFILES_DIR/global.gitignore" "$HOME/.gitignore"
+
+# Make sure .zshrc imports .bash_profile
+ZSHRC_FILE="$HOME/.zshrc"
+touch "$ZSHRC_FILE"
+if ! grep -Fq "source ~/.bash_profile" "$ZSHRC_FILE"; then
+	{
+		echo
+		echo "# Include bash_profile"
+		echo "if [ -f ~/.bash_profile ]; then"
+		echo "    source ~/.bash_profile"
+		echo "fi"
+	} >>"$ZSHRC_FILE"
+fi
+
 # Used to hide the login message
 ln -sf "$DOTFILES_DIR/.hushlogin" "$HOME/.hushlogin"
 
