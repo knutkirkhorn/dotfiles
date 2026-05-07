@@ -12,3 +12,6 @@ fpath+=("/opt/zerobrew/prefix/share/zsh/site-functions")
 
 autoload -U promptinit; promptinit
 prompt pure
+
+# Fast Node Manager (fnm)
+eval "$(fnm env --use-on-cd --shell zsh)"

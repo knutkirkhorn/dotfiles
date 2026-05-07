@@ -35,6 +35,9 @@ brew install --cask \
 	crystalfetch \
 	stats
 
+# Install Node using Fast Node Manager (fnm)
+fnm install 24
+
 # Install Bun
 curl -fsSL https://bun.sh/install | bash
 
