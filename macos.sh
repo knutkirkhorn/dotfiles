@@ -17,6 +17,9 @@ brew install oven-sh/bun/bun
 # Install Homebrew packages using Zerobrew
 zb bundle
 
+# Install Homebrew packages using Brewfile
+brew bundle --file brew.Brewfile
+
 # Install Homebrew GUI apps
 brew install --cask \
 	firefox \
