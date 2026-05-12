@@ -6,19 +6,20 @@
 # - Yarn: minutes (npmMinimalAgeGate in ~/.yarnrc)
 # - Bun: seconds (minimumReleaseAge in bunfig)
 #
-# Lifecycle scripts: `npm config set ignore-scripts true` writes ~/.npmrc; Bun honors that (bun.com/docs/install/npmrc)
+# Lifecycle scripts: npm and pnpm need their own config; Bun honors ~/.npmrc (bun.com/docs/install/npmrc)
 # Bun still gates dependency scripts via trustedDependencies and can also read ignoreScripts from bunfig
 # One-off npm install with scripts: npm install --ignore-scripts=false
 readonly MIN_RELEASE_AGE_DAYS=7
 readonly MIN_RELEASE_AGE_MINUTES=$((MIN_RELEASE_AGE_DAYS * 24 * 60))
 readonly MIN_RELEASE_AGE_SECONDS=$((MIN_RELEASE_AGE_MINUTES * 60))
 
-# pnpm reads minimum-release-age from ~/.npmrc (minutes)
-setup_pnpm_min_release_age() {
+# pnpm reads minimum-release-age from ~/.npmrc (minutes), but ignoreScripts from its own config
+setup_pnpm_security_config() {
 	# Check if pnpm is installed
 	command -v pnpm >/dev/null 2>&1 || return 0
 
 	pnpm config set minimum-release-age "$MIN_RELEASE_AGE_MINUTES"
+	pnpm config set ignore-scripts true
 }
 
 setup_yarn_min_release_age() {
@@ -102,7 +103,7 @@ for path in paths:
 
 npm config set min-release-age "$MIN_RELEASE_AGE_DAYS"
 npm config set ignore-scripts true
-setup_pnpm_min_release_age
+setup_pnpm_security_config
 setup_yarn_min_release_age
 setup_yarn_ignore_scripts
 setup_bun_security_config

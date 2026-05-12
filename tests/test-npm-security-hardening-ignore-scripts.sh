@@ -99,6 +99,58 @@ install_with_manager() {
 	esac
 }
 
+run_pnpm_ignored_builds_regression_test() {
+	local pnpm_home="$TMP_ROOT/pnpm-ignored-builds-home"
+	local ignored_output="$TMP_ROOT/pnpm-ignored-builds.log"
+	local approved_output="$TMP_ROOT/pnpm-approved-builds.log"
+	local project
+
+	echo -e "${BOLD}Test: pnpm reports ignored builds before approval${NC}"
+
+	if ! command -v pnpm >/dev/null 2>&1; then
+		echo -e "  ${YELLOW}SKIP${NC}: pnpm is not installed"
+		SKIP=$((SKIP + 1))
+		return
+	fi
+
+	mkdir -p "$pnpm_home"
+	run_with_home "$pnpm_home" npm config set ignore-scripts true >/dev/null
+	project="$(setup_project pnpm pnpm-ignored-builds)"
+
+	if install_with_manager pnpm "$project" "$pnpm_home" pnpm-ignored-builds >"$ignored_output" 2>&1; then
+		echo -e "  ${RED}FAIL${NC}: pnpm did not report ignored builds"
+		sed 's/^/    /' "$ignored_output"
+		FAIL=$((FAIL + 1))
+		return
+	fi
+
+	if grep -q 'ERR_PNPM_IGNORED_BUILDS' "$ignored_output" && grep -q 'pnpm approve-builds' "$ignored_output"; then
+		echo -e "  ${GREEN}PASS${NC}: pnpm reported ignored builds and suggested approval"
+		PASS=$((PASS + 1))
+	else
+		echo -e "  ${RED}FAIL${NC}: pnpm failed without the expected ignored-builds message"
+		sed 's/^/    /' "$ignored_output"
+		FAIL=$((FAIL + 1))
+		return
+	fi
+
+	if (
+		cd "$project"
+		run_with_home "$pnpm_home" pnpm approve-builds --all
+	) >"$approved_output" 2>&1; then
+		echo -e "  ${RED}FAIL${NC}: pnpm approve-builds did not run the failing lifecycle script"
+		sed 's/^/    /' "$approved_output"
+		FAIL=$((FAIL + 1))
+	elif grep -q 'preinstall' "$approved_output" && grep -q 'ELIFECYCLE' "$approved_output"; then
+		echo -e "  ${GREEN}PASS${NC}: pnpm approve-builds runs the canary lifecycle script"
+		PASS=$((PASS + 1))
+	else
+		echo -e "  ${RED}FAIL${NC}: pnpm approve-builds failed for an unexpected reason"
+		sed 's/^/    /' "$approved_output"
+		FAIL=$((FAIL + 1))
+	fi
+}
+
 run_ignore_scripts_test() {
 	local manager="$1"
 	local control_home="$TMP_ROOT/$manager-control-home"
@@ -142,6 +194,7 @@ run_ignore_scripts_test() {
 setup_hardened_home
 
 run_ignore_scripts_test npm
+run_pnpm_ignored_builds_regression_test
 run_ignore_scripts_test pnpm
 run_ignore_scripts_test yarn
 run_ignore_scripts_test bun
