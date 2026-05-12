@@ -4,7 +4,7 @@ git pull --quiet
 
 BOOTSTRAP_PATH="${BASH_SOURCE[0]:-}"
 if [ -n "${ZSH_VERSION:-}" ]; then
-	BOOTSTRAP_PATH="${(%):-%x}"
+	BOOTSTRAP_PATH="$(eval 'printf "%s\n" "${(%):-%x}"')"
 fi
 DOTFILES_DIR="$(cd "$(dirname "$BOOTSTRAP_PATH")" && pwd)"
 
@@ -64,6 +64,8 @@ if [ ! -f ~/.extra ]; then
 	touch ~/.extra
 fi
 
+# Skip shellcheck for this file, we are already validating the one in the repo anyway
+# shellcheck source=/dev/null
 source ~/.bash_profile
 
 echo "Refreshed dotfiles!"
