@@ -7,6 +7,5 @@ brew "fastlane"
 mas "Pure Paste", id: 1611378436
 mas "Week Number", id: 6502579523
 mas "Camera Preview", id: 1632827132
-# For remote desktop
-mas "Windows App", id: 1295203466
+mas "Windows App", id: 1295203466 # For remote desktop
 mas "One Thing", id: 1604176982
