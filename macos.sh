@@ -39,7 +39,8 @@ brew install --cask \
 	obsidian \
 	android-platform-tools \
 	crystalfetch \
-	stats
+	stats \
+	thaw
 
 # Install Node using Fast Node Manager (fnm)
 fnm install 24
