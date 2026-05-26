@@ -13,6 +13,8 @@ curl -sSL https://zerobrew.rs/install | bash
 brew install mike-engel/jwt-cli/jwt-cli
 # bun.com (https://github.com/oven-sh/homebrew-bun)
 brew install oven-sh/bun/bun
+# Instant Space Switcher (https://github.com/jurplel/InstantSpaceSwitcher)
+brew install --cask jurplel/tap/instant-space-switcher
 
 # Install Homebrew packages using Zerobrew
 zb bundle
