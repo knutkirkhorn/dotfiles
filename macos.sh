@@ -11,7 +11,7 @@ curl -sSL https://zerobrew.rs/install | bash
 # Specific taps
 # jwt-cli (https://github.com/mike-engel/jwt-cli)
 brew install mike-engel/jwt-cli/jwt-cli
-# bun.com (https://github.com/oven-sh/homebrew-bun)
+# Install Bun (bun.com / https://github.com/oven-sh/homebrew-bun)
 brew install oven-sh/bun/bun
 # Instant Space Switcher (https://github.com/jurplel/InstantSpaceSwitcher)
 brew install --cask jurplel/tap/instant-space-switcher
@@ -44,9 +44,6 @@ brew install --cask \
 
 # Install Node using Fast Node Manager (fnm)
 fnm install 24
-
-# Install Bun
-curl -fsSL https://bun.sh/install | bash
 
 # Cleanup
 brew cleanup
