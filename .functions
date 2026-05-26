@@ -67,6 +67,63 @@ function base64decode() {
 	printf '%s' "$1" | base64 -d
 }
 
+function open-repo() {
+	local git_remote_url
+	local repo_host
+	local repo_path
+
+	if ! command -v git >/dev/null 2>&1; then
+		echo "Error: git is required"
+		return 1
+	fi
+
+	if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+		echo "Error: not inside a git repository"
+		return 1
+	fi
+
+	if ! command -v open >/dev/null 2>&1; then
+		echo "Error: open command not found"
+		return 1
+	fi
+
+	git_remote_url="$(git remote get-url origin 2>/dev/null)"
+	if [ -z "$git_remote_url" ]; then
+		echo "Error: origin remote not found"
+		return 1
+	fi
+
+	case "$git_remote_url" in
+	git@*:*)
+		repo_host="${git_remote_url#git@}"
+		repo_host="${repo_host%%:*}"
+		repo_path="${git_remote_url#*:}"
+		;;
+	ssh://git@*/*)
+		repo_host="${git_remote_url#ssh://git@}"
+		repo_host="${repo_host%%/*}"
+		repo_host="${repo_host%%:*}"
+		repo_path="${git_remote_url#ssh://git@*/}"
+		;;
+	http://*/* | https://*/*)
+		repo_host="${git_remote_url#*://}"
+		repo_host="${repo_host%%/*}"
+		repo_path="${git_remote_url#*://*/}"
+		;;
+	*)
+		echo "Error: unsupported origin remote URL"
+		return 1
+		;;
+	esac
+
+	case "$repo_host" in
+	*github* | *gitlab*) ;;
+	*)
+		echo "Error: origin remote is not GitHub or GitLab"
+		return 1
+		;;
+	esac
+
 function update-shadcn-components() {
 	# Check if components/ui directory exists
 	if [ ! -d "components/ui" ]; then
