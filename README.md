@@ -97,6 +97,18 @@ bun run scripts/init-clickup-week.ts --dry-run
 
 The launchd job is stored in [`scripts/launchd/com.knut.clickup-init-week.plist`](scripts/launchd/com.knut.clickup-init-week.plist) and symlinked to `~/Library/LaunchAgents` by `bootstrap.sh`.
 
+## macOS storage alert
+
+`scripts/check-macos-storage.sh` checks available storage on `/` and shows an alert when less than 30% is available.
+
+The launchd job is stored in [`scripts/launchd/com.knut.macos-storage-check.plist`](scripts/launchd/com.knut.macos-storage-check.plist), runs every Monday at 10:00, and is symlinked to `~/Library/LaunchAgents` by `bootstrap.sh`.
+
+Override the defaults when running manually:
+
+```sh
+MACOS_STORAGE_ALERT_THRESHOLD_PERCENT=25 MACOS_STORAGE_ALERT_VOLUME=/ bash scripts/check-macos-storage.sh
+```
+
 ## Teams Norwegian holiday Out of Office
 
 `scripts/teams-norwegian-holidays-ics-generator.ts` finds Norwegian public holidays with `date-holidays` and writes an `.ics` calendar file with all-day out-of-office events.
