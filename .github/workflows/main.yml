@@ -59,6 +59,13 @@ jobs:
       - name: Run tests
         run: bash test.sh
 
+  lint-launchd:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Lint launchd plists
+        run: plutil -lint scripts/launchd/*.plist
+
   lint-javascript:
     runs-on: ubuntu-latest
     steps:
