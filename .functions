@@ -124,6 +124,10 @@ function open-repo() {
 		;;
 	esac
 
+	repo_path="${repo_path%.git}"
+	open "https://${repo_host}/${repo_path}"
+}
+
 function update-shadcn-components() {
 	# Check if components/ui directory exists
 	if [ ! -d "components/ui" ]; then
