@@ -25,6 +25,7 @@ jobs:
             "npm/npm-security-hardening.sh"
             "tests/test-base64decode.sh"
             "tests/test-npm-security-hardening-ignore-scripts.sh"
+            "tests/test-open-pr.sh"
             "tests/test-open-gitlab-pr.sh"
           )
           for file in "${files[@]}"; do
@@ -45,6 +46,7 @@ jobs:
             npm/npm-security-hardening.sh \
             tests/test-base64decode.sh \
             tests/test-npm-security-hardening-ignore-scripts.sh \
+            tests/test-open-pr.sh \
             tests/test-open-gitlab-pr.sh
 
   tests:

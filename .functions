@@ -67,29 +67,34 @@ function base64decode() {
 	printf '%s' "$1" | base64 -d
 }
 
-function open-repo() {
+function _urlencode() {
+	local input="$1"
+	local output=""
+	local i char hex
+
+	LC_ALL=C
+	for ((i = 0; i < ${#input}; i++)); do
+		char="${input:$i:1}"
+		case "$char" in
+		[a-zA-Z0-9.~_-]) output+="$char" ;;
+		*)
+			printf -v hex '%02X' "'$char"
+			output+="%$hex"
+			;;
+		esac
+	done
+
+	printf '%s' "$output"
+}
+
+function _git_origin_web_url() {
 	local git_remote_url
 	local repo_host
 	local repo_path
 
-	if ! command -v git >/dev/null 2>&1; then
-		echo "Error: git is required"
-		return 1
-	fi
-
-	if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-		echo "Error: not inside a git repository"
-		return 1
-	fi
-
-	if ! command -v open >/dev/null 2>&1; then
-		echo "Error: open command not found"
-		return 1
-	fi
-
 	git_remote_url="$(git remote get-url origin 2>/dev/null)"
 	if [ -z "$git_remote_url" ]; then
-		echo "Error: origin remote not found"
+		echo "Error: origin remote not found" >&2
 		return 1
 	fi
 
@@ -111,10 +116,37 @@ function open-repo() {
 		repo_path="${git_remote_url#*://*/}"
 		;;
 	*)
-		echo "Error: unsupported origin remote URL"
+		echo "Error: unsupported origin remote URL" >&2
 		return 1
 		;;
 	esac
+
+	repo_path="${repo_path%.git}"
+	printf 'https://%s/%s\n' "$repo_host" "$repo_path"
+}
+
+function open-repo() {
+	local repo_url
+	local repo_host
+
+	if ! command -v git >/dev/null 2>&1; then
+		echo "Error: git is required"
+		return 1
+	fi
+
+	if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+		echo "Error: not inside a git repository"
+		return 1
+	fi
+
+	if ! command -v open >/dev/null 2>&1; then
+		echo "Error: open command not found"
+		return 1
+	fi
+
+	repo_url="$(_git_origin_web_url)" || return 1
+	repo_host="${repo_url#https://}"
+	repo_host="${repo_host%%/*}"
 
 	case "$repo_host" in
 	*github* | *gitlab*) ;;
@@ -124,8 +156,57 @@ function open-repo() {
 		;;
 	esac
 
-	repo_path="${repo_path%.git}"
-	open "https://${repo_host}/${repo_path}"
+	open "$repo_url"
+}
+
+function open-pr() {
+	local repo_url
+	local repo_host
+	local repo_path
+	local repo_owner
+	local git_branch_name
+	local pr_query
+
+	if ! command -v git >/dev/null 2>&1; then
+		echo "Error: git is required"
+		return 1
+	fi
+
+	if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+		echo "Error: not inside a git repository"
+		return 1
+	fi
+
+	if ! command -v open >/dev/null 2>&1; then
+		echo "Error: open command not found"
+		return 1
+	fi
+
+	repo_url="$(_git_origin_web_url)" || return 1
+	repo_host="${repo_url#https://}"
+	repo_path="${repo_host#*/}"
+	repo_host="${repo_host%%/*}"
+
+	git_branch_name="$(git branch --show-current)"
+	if [ -z "$git_branch_name" ]; then
+		echo "Error: could not determine current branch"
+		return 1
+	fi
+
+	case "$repo_host" in
+	*github*)
+		repo_owner="${repo_path%%/*}"
+		pr_query="is:pr is:open head:${repo_owner}:${git_branch_name}"
+		open "${repo_url}/pulls?q=$(_urlencode "$pr_query")"
+		;;
+	*gitlab*)
+		open "${repo_url}/-/merge_requests?scope=all&state=opened&source_branch=$(_urlencode "$git_branch_name")"
+		;;
+	*)
+		echo "Error: origin remote is not GitHub or GitLab"
+		return 1
+		;;
+	esac
 }
 
 function update-shadcn-components() {
@@ -161,6 +242,15 @@ function update-shadcn-components() {
 }
 
 function open-gitlab-pr() {
+	local git_remote_url
+	local git_branch_name
+	local default_branch
+	local commits_ahead
+	local pr_title
+	local encoded_branch
+	local encoded_title
+	local gitlab_pr_url
+
 	if ! command -v git >/dev/null 2>&1; then
 		echo "Error: git is required"
 		return 1
@@ -176,34 +266,14 @@ function open-gitlab-pr() {
 		return 1
 	fi
 
-	urlencode() {
-		local input="$1"
-		local output=""
-		local i char hex
-
-		LC_ALL=C
-		for ((i = 0; i < ${#input}; i++)); do
-			char="${input:$i:1}"
-			case "$char" in
-			[a-zA-Z0-9.~_-]) output+="$char" ;;
-			*)
-				printf -v hex '%02X' "'$char"
-				output+="%$hex"
-				;;
-			esac
-		done
-
-		printf '%s' "$output"
-	}
-
-	# Get and normalize git remote URL (supports HTTPS and SSH formats)
-	git_remote_url="$(git remote get-url origin)"
-	if [[ "$git_remote_url" =~ ^git@([^:]+):(.+)$ ]]; then
-		git_remote_url="https://${BASH_REMATCH[1]}/${BASH_REMATCH[2]}"
-	elif [[ "$git_remote_url" =~ ^ssh://git@([^/]+)/(.+)$ ]]; then
-		git_remote_url="https://${BASH_REMATCH[1]}/${BASH_REMATCH[2]}"
-	fi
-	git_remote_url="${git_remote_url%.git}"
+	git_remote_url="$(_git_origin_web_url)" || return 1
+	case "$git_remote_url" in
+	https://*gitlab*/*) ;;
+	*)
+		echo "Error: origin remote is not GitLab"
+		return 1
+		;;
+	esac
 
 	git_branch_name="$(git branch --show-current)"
 	if [ -z "$git_branch_name" ]; then
@@ -240,8 +310,8 @@ function open-gitlab-pr() {
 	fi
 
 	# Open the PR in the browser
-	encoded_branch="$(urlencode "$git_branch_name")"
-	encoded_title="$(urlencode "$pr_title")"
+	encoded_branch="$(_urlencode "$git_branch_name")"
+	encoded_title="$(_urlencode "$pr_title")"
 	gitlab_pr_url="${git_remote_url}/-/merge_requests/new?merge_request%5Bsource_branch%5D=${encoded_branch}&merge_request%5Btitle%5D=${encoded_title}"
 	open "$gitlab_pr_url"
 }
