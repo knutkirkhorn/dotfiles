@@ -42,6 +42,9 @@ brew install --cask \
 	stats \
 	thaw
 
+# Install mysql, did not work through zerobrew (test again later):
+brew install mysql-client
+
 # Install Node using Fast Node Manager (fnm)
 fnm install 24
 
