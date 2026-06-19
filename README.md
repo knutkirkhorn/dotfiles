@@ -95,13 +95,13 @@ bun run scripts/init-clickup-week.ts --dry-run
 
 ### Automation
 
-The launchd job is stored in [`scripts/launchd/com.knut.clickup-init-week.plist`](scripts/launchd/com.knut.clickup-init-week.plist) and symlinked to `~/Library/LaunchAgents` by `bootstrap.sh`.
+The launchd job is stored in [`scripts/launchd/com.knutkirkhorn.clickup-init-week.plist`](scripts/launchd/com.knutkirkhorn.clickup-init-week.plist) and symlinked to `~/Library/LaunchAgents` by `bootstrap.sh`.
 
 ## macOS storage alert
 
 `scripts/check-macos-storage.sh` checks available storage on `/` and shows an alert when less than 30% is available.
 
-The launchd job is stored in [`scripts/launchd/com.knut.macos-storage-check.plist`](scripts/launchd/com.knut.macos-storage-check.plist), runs every Monday at 10:00, and is symlinked to `~/Library/LaunchAgents` by `bootstrap.sh`.
+The launchd job is stored in [`scripts/launchd/com.knutkirkhorn.macos-storage-check.plist`](scripts/launchd/com.knutkirkhorn.macos-storage-check.plist), runs every Monday at 10:00, and is symlinked to `~/Library/LaunchAgents` by `bootstrap.sh`.
 
 Override the defaults when running manually:
 
