@@ -43,6 +43,7 @@ fi
 CURSOR_RULES_DIR="$HOME/.cursor/rules"
 mkdir -p "$CURSOR_RULES_DIR"
 cp "$DOTFILES_DIR/.cursor/rules/general-coding-practices.mdc" "$CURSOR_RULES_DIR/general-coding-practices.mdc"
+cp "$DOTFILES_DIR/.cursor/rules/docker-compose.mdc" "$CURSOR_RULES_DIR/docker-compose.mdc"
 cp "$DOTFILES_DIR/.cursor/rules/javascript-typescript.mdc" "$CURSOR_RULES_DIR/javascript-typescript.mdc"
 cp "$DOTFILES_DIR/.cursor/rules/prefer-uv-over-pip.mdc" "$CURSOR_RULES_DIR/prefer-uv-over-pip.mdc"
 cp "$DOTFILES_DIR/.cursor/rules/prefer-zb-over-brew.mdc" "$CURSOR_RULES_DIR/prefer-zb-over-brew.mdc"
