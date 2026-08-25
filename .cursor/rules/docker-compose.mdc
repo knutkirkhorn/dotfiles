@@ -1,0 +1,10 @@
+---
+description: Docker Compose file naming convention
+globs: '**/{compose,docker-compose}.{yaml,yml}'
+alwaysApply: false
+---
+
+# Docker Compose
+
+- Name generated Docker Compose files `compose.yaml`
+- Do not use `compose.yml`, `docker-compose.yaml`, or `docker-compose.yml`
