@@ -2,4 +2,8 @@
 alwaysApply: true
 ---
 
-After finishing changes run tests (see /tests/README.md) and apply new changes by running `source bootstrap.sh`.
+# Dotfiles Workflow
+
+- When adding a rule to `.cursor/rules/`, add its explicit `cp` entry to `bootstrap.sh` so it is synced to `~/.cursor/rules/`
+- After finishing changes, run the tests documented in `/tests/README.md`
+- Apply new changes by running `source bootstrap.sh`
