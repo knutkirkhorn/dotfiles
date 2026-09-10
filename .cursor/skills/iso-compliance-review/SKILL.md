@@ -111,14 +111,17 @@ Produce:
 # ISO 27001 and ISO 9001 readiness review
 
 ## Scope and limitations
+
 [Assessed scope, available evidence, exclusions, assumptions, and why this is not certification]
 
 ## Executive summary
+
 [Overall readiness, strongest evidence, largest risks, and priority actions]
 
 ## Findings
 
 ### [ID] [Short finding] — [Severity]
+
 - Standards: [ISO/IEC 27001 clause/control theme; ISO 9001 clause where relevant]
 - Evidence status: [Supported | Partial | Not evidenced | Not applicable]
 - Evidence: [`path:line` citations and relevant repository behavior]
@@ -127,14 +130,17 @@ Produce:
 - Remediation: [Smallest practical corrective action, owner/evidence needed, and verification method]
 
 ## Evidence unavailable from the repository
+
 [Operational and organizational artifacts needed to complete the assessment]
 
 ## Prioritized remediation plan
+
 1. [Immediate]
 2. [Near term]
 3. [Longer term]
 
 ## Positive evidence
+
 [Supported practices worth preserving]
 ```
 
