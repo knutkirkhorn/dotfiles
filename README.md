@@ -60,13 +60,13 @@ Set these in `.env`:
 
 ```sh
 CLICKUP_API_KEY=...
-CLICKUP_TASK_IDENTIFIER=ENET-1149
+CLICKUP_TASK_IDENTIFIER=TASKID-1234
 ```
 
 For multiple tasks, use a comma-separated list in `CLICKUP_TASK_IDENTIFIERS`, or the same format in `CLICKUP_TASK_IDENTIFIER` (or pass multiple arguments when running manually):
 
 ```sh
-CLICKUP_TASK_IDENTIFIERS=ENET-1149,ENET-2001
+CLICKUP_TASK_IDENTIFIERS=TASKID-1234,TASKID-5678
 ```
 
 Optional:
@@ -84,7 +84,7 @@ bun run scripts/init-clickup-week.ts
 Override task(s) from CLI (one or more):
 
 ```sh
-bun run scripts/init-clickup-week.ts ENET-1149 ENET-2001
+bun run scripts/init-clickup-week.ts TASKID-1234 TASKID-5678
 ```
 
 Preview what would be created without writing time entries:
