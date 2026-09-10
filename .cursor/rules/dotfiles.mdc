@@ -5,5 +5,6 @@ alwaysApply: true
 # Dotfiles Workflow
 
 - When adding a rule to `.cursor/rules/`, add its explicit `cp` entry to `bootstrap.sh` so it is synced to `~/.cursor/rules/`
+- When adding a skill to `.cursor/skills/`, add its explicit `cp` entry to `bootstrap.sh` so it is synced to `~/.cursor/skills/`
 - After finishing changes, run the tests documented in `/tests/README.md`
 - Apply new changes by running `source bootstrap.sh`

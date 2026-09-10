@@ -48,6 +48,11 @@ cp "$DOTFILES_DIR/.cursor/rules/javascript-typescript.mdc" "$CURSOR_RULES_DIR/ja
 cp "$DOTFILES_DIR/.cursor/rules/prefer-uv-over-pip.mdc" "$CURSOR_RULES_DIR/prefer-uv-over-pip.mdc"
 cp "$DOTFILES_DIR/.cursor/rules/prefer-zb-over-brew.mdc" "$CURSOR_RULES_DIR/prefer-zb-over-brew.mdc"
 
+# Copy Cursor skills to home directory
+CURSOR_SKILLS_DIR="$HOME/.cursor/skills"
+mkdir -p "$CURSOR_SKILLS_DIR/iso-compliance-review"
+cp "$DOTFILES_DIR/.cursor/skills/iso-compliance-review/SKILL.md" "$CURSOR_SKILLS_DIR/iso-compliance-review/SKILL.md"
+
 # Symlink launchd jobs
 LAUNCH_AGENTS_DIR="$HOME/Library/LaunchAgents"
 mkdir -p "$LAUNCH_AGENTS_DIR"
