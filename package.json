@@ -3,6 +3,7 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
+		"clickup:meetings": "bun run scripts/sync-clickup-weekly-meetings.ts",
 		"teams:out-of-office": "bun run scripts/teams-norwegian-holidays-ics-generator.ts",
 		"lint": "eslint .",
 		"format:check": "prettier . --check"
