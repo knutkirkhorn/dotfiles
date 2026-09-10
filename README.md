@@ -50,9 +50,12 @@ Windows setup scripts live under [`windows/`](windows/). Run [`windows/windows.p
 .\windows\windows.ps1
 ```
 
-## ClickUp weekly init
+## ClickUp weekly meeting sync
 
-`scripts/init-clickup-week.ts` creates weekday (Mon-Fri) 30m time entries at 09:00 for the configured ClickUp task(s) in the current week.
+`scripts/sync-clickup-weekly-meetings.ts` is the single weekly ClickUp entry
+point. It creates or updates time entries for the configured recurring meetings
+in the current week (including later weekdays). Re-running it is safe: matching
+entries stay unchanged, and only missing or outdated ones are created or updated.
 
 ### Required env vars
 
@@ -60,13 +63,6 @@ Set these in `.env`:
 
 ```sh
 CLICKUP_API_KEY=...
-CLICKUP_TASK_IDENTIFIER=TASKID-1234
-```
-
-For multiple tasks, use a comma-separated list in `CLICKUP_TASK_IDENTIFIERS`, or the same format in `CLICKUP_TASK_IDENTIFIER` (or pass multiple arguments when running manually):
-
-```sh
-CLICKUP_TASK_IDENTIFIERS=TASKID-1234,TASKID-5678
 ```
 
 Optional:
@@ -75,30 +71,7 @@ Optional:
 CLICKUP_TEAM_ID=...
 ```
 
-### Run manually
-
-```sh
-bun run scripts/init-clickup-week.ts
-```
-
-Override task(s) from CLI (one or more):
-
-```sh
-bun run scripts/init-clickup-week.ts TASKID-1234 TASKID-5678
-```
-
-Preview what would be created without writing time entries:
-
-```sh
-bun run scripts/init-clickup-week.ts --dry-run
-```
-
-## ClickUp weekly meeting sync
-
-`scripts/sync-clickup-weekly-meetings.ts` logs the configured recurring
-meetings for the full current week, including meetings later in the week. It
-uses `CLICKUP_API_KEY` and the optional `CLICKUP_TEAM_ID` from the weekly init
-script.
+### Meeting config
 
 Configure meetings in
 [`scripts/clickup-weekly-meetings.json`](scripts/clickup-weekly-meetings.json):
@@ -120,21 +93,23 @@ Add one entry for each weekly meeting. Meetings mapped to the same task and
 weekday are combined into one time entry. Times are stored at noon in the Mac's
 local timezone because only the day and duration are relevant.
 
+The script leaves time-entry descriptions empty and finds existing entries by
+their ClickUp task and scheduled weekday. Removing a meeting from the mapping
+does not delete an existing entry.
+
+### Run manually
+
 Preview changes:
 
 ```sh
 bun run clickup:meetings --dry-run
 ```
 
-Apply changes:
+Apply / resync:
 
 ```sh
 bun run clickup:meetings
 ```
-
-The script leaves time-entry descriptions empty and finds existing entries by
-their ClickUp task and scheduled weekday. Removing a meeting from the mapping
-does not delete an existing entry.
 
 Use a different mapping file:
 
@@ -144,7 +119,10 @@ bun run clickup:meetings --dry-run --config path/to/meetings.json
 
 ### Automation
 
-The launchd job is stored in [`scripts/launchd/com.knutkirkhorn.clickup-init-week.plist`](scripts/launchd/com.knutkirkhorn.clickup-init-week.plist) and symlinked to `~/Library/LaunchAgents` by `bootstrap.sh`.
+A launchd job runs the sync every Monday at 09:05 (and on load). The plist is
+[`scripts/launchd/com.knutkirkhorn.clickup-weekly-meetings.plist`](scripts/launchd/com.knutkirkhorn.clickup-weekly-meetings.plist)
+and is symlinked to `~/Library/LaunchAgents` by `bootstrap.sh`. Logs go to
+`/tmp/clickup-weekly-meetings.out.log` and `/tmp/clickup-weekly-meetings.err.log`.
 
 ## macOS storage alert
 

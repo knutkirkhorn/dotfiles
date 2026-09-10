@@ -56,12 +56,12 @@ cp "$DOTFILES_DIR/.cursor/skills/iso-compliance-review/SKILL.md" "$CURSOR_SKILLS
 # Symlink launchd jobs
 LAUNCH_AGENTS_DIR="$HOME/Library/LaunchAgents"
 mkdir -p "$LAUNCH_AGENTS_DIR"
-ln -sfn "$DOTFILES_DIR/scripts/launchd/com.knutkirkhorn.clickup-init-week.plist" "$LAUNCH_AGENTS_DIR/com.knutkirkhorn.clickup-init-week.plist"
+ln -sfn "$DOTFILES_DIR/scripts/launchd/com.knutkirkhorn.clickup-weekly-meetings.plist" "$LAUNCH_AGENTS_DIR/com.knutkirkhorn.clickup-weekly-meetings.plist"
 ln -sfn "$DOTFILES_DIR/scripts/launchd/com.knutkirkhorn.macos-storage-check.plist" "$LAUNCH_AGENTS_DIR/com.knutkirkhorn.macos-storage-check.plist"
 # Reload launchd jobs
-launchctl unload "$LAUNCH_AGENTS_DIR/com.knutkirkhorn.clickup-init-week.plist" 2>/dev/null
-launchctl load "$LAUNCH_AGENTS_DIR/com.knutkirkhorn.clickup-init-week.plist"
-launchctl start com.knutkirkhorn.clickup-init-week
+launchctl unload "$LAUNCH_AGENTS_DIR/com.knutkirkhorn.clickup-weekly-meetings.plist" 2>/dev/null
+launchctl load "$LAUNCH_AGENTS_DIR/com.knutkirkhorn.clickup-weekly-meetings.plist"
+launchctl start com.knutkirkhorn.clickup-weekly-meetings
 launchctl unload "$LAUNCH_AGENTS_DIR/com.knutkirkhorn.macos-storage-check.plist" 2>/dev/null
 launchctl load "$LAUNCH_AGENTS_DIR/com.knutkirkhorn.macos-storage-check.plist"
 

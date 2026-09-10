@@ -3,12 +3,12 @@
 <plist version="1.0">
   <dict>
     <key>Label</key>
-    <string>com.knutkirkhorn.clickup-init-week</string>
+    <string>com.knutkirkhorn.clickup-weekly-meetings</string>
     <key>ProgramArguments</key>
     <array>
       <string>/bin/zsh</string>
       <string>-lc</string>
-      <string>cd /Users/knutkirkhorn/dev/dotfiles &amp;&amp; set -a &amp;&amp; source .env &amp;&amp; set +a &amp;&amp; bun run scripts/init-clickup-week.ts; exit_code=$?; if [ $exit_code -ne 0 ]; then osascript -e 'display alert "ClickUp weekly init failed" message "Check /tmp/clickup-init-week.err.log" as critical buttons {"OK"} default button "OK"'; afplay /System/Library/Sounds/Basso.aiff; fi; exit $exit_code</string>
+      <string>cd /Users/knutkirkhorn/dev/dotfiles &amp;&amp; set -a &amp;&amp; source .env &amp;&amp; set +a &amp;&amp; bun run clickup:meetings; exit_code=$?; if [ $exit_code -ne 0 ]; then osascript -e 'display alert "ClickUp weekly meetings sync failed" message "Check /tmp/clickup-weekly-meetings.err.log" as critical buttons {"OK"} default button "OK"'; afplay /System/Library/Sounds/Basso.aiff; fi; exit $exit_code</string>
     </array>
     <key>StartCalendarInterval</key>
     <dict>
@@ -22,8 +22,8 @@
     <key>RunAtLoad</key>
     <true/>
     <key>StandardOutPath</key>
-    <string>/tmp/clickup-init-week.out.log</string>
+    <string>/tmp/clickup-weekly-meetings.out.log</string>
     <key>StandardErrorPath</key>
-    <string>/tmp/clickup-init-week.err.log</string>
+    <string>/tmp/clickup-weekly-meetings.err.log</string>
   </dict>
 </plist>
