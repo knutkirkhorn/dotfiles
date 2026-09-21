@@ -25,6 +25,7 @@ const DEFAULT_CONFIG_URL = new URL(
 );
 const DRY_RUN_FLAG = '--dry-run';
 const CONFIG_FLAG = '--config';
+const DATE_FLAG = '--date';
 const ENTRY_START_HOUR = 12;
 const DUTY_DAY_OFF_SUMMARY = 'Day off due to duty last weekend';
 
@@ -47,9 +48,15 @@ export interface MeetingConfig {
 	durationMinutes: number;
 }
 
+export interface DutyCalendarConfig {
+	url: string;
+	taskIdentifier: string;
+	durationMinutes: number;
+}
+
 interface ScheduleConfig {
 	meetings: MeetingConfig[];
-	dutyCalendarUrl?: string;
+	dutyCalendar?: DutyCalendarConfig;
 }
 
 interface ClickUpUser {
@@ -98,6 +105,7 @@ export interface SyncPlanItem {
 interface CliOptions {
 	configPath: string | URL;
 	dryRun: boolean;
+	referenceDate: Date;
 }
 
 function getApiKey(): string {
@@ -190,6 +198,11 @@ function formatIcsDateOnly(date: Date): string {
 	return `${year}${month}${day}`;
 }
 
+function formatLocalDate(date: Date): string {
+	const icsDate = formatIcsDateOnly(date);
+	return `${icsDate.slice(0, 4)}-${icsDate.slice(4, 6)}-${icsDate.slice(6, 8)}`;
+}
+
 export function hasDutyDayOffOnFriday(
 	icsContents: string,
 	now = new Date(),
@@ -215,7 +228,32 @@ export function hasDutyDayOffOnFriday(
 	);
 }
 
-async function hasDutyDayOffThisFriday(calendarUrl: string): Promise<boolean> {
+export function applyDutyDayOff(
+	meetings: MeetingConfig[],
+	dutyCalendar: DutyCalendarConfig,
+): {meetings: MeetingConfig[]; skippedFridayMeetingCount: number} {
+	const skippedFridayMeetingCount = meetings.filter(
+		meeting => meeting.weekday === 'friday',
+	).length;
+
+	return {
+		meetings: [
+			...meetings.filter(meeting => meeting.weekday !== 'friday'),
+			{
+				name: DUTY_DAY_OFF_SUMMARY,
+				taskIdentifier: dutyCalendar.taskIdentifier,
+				weekday: 'friday',
+				durationMinutes: dutyCalendar.durationMinutes,
+			},
+		],
+		skippedFridayMeetingCount,
+	};
+}
+
+async function hasDutyDayOffThisFriday(
+	calendarUrl: string,
+	referenceDate: Date,
+): Promise<boolean> {
 	let response: Response;
 	try {
 		response = await fetch(calendarUrl);
@@ -227,14 +265,15 @@ async function hasDutyDayOffThisFriday(calendarUrl: string): Promise<boolean> {
 		throw new Error(`Duty calendar request failed (${response.status})`);
 	}
 
-	return hasDutyDayOffOnFriday(await response.text());
+	return hasDutyDayOffOnFriday(await response.text(), referenceDate);
 }
 
 async function getWeekEntries(
 	teamId: string,
 	userId: number,
+	referenceDate: Date,
 ): Promise<TimeEntry[]> {
-	const {start, end} = getWeekRange();
+	const {start, end} = getWeekRange(referenceDate);
 	const response = await clickupRequest<TimeEntriesResponse>(
 		`/team/${teamId}/time_entries?start_date=${start.getTime()}&end_date=${end.getTime()}&assignee=${userId}`,
 	);
@@ -268,11 +307,18 @@ export function buildSyncPlan(
 	}
 
 	return [...groups.values()].map(group => {
-		const existingEntry = existingEntries.find(
-			entry =>
-				entry.task?.id === group.taskId &&
-				Number.parseInt(entry.start, 10) === group.start.getTime(),
-		);
+		const existingEntry = existingEntries.find(entry => {
+			if (entry.task?.id !== group.taskId) {
+				return false;
+			}
+
+			const entryStart = new Date(Number.parseInt(entry.start, 10));
+			return (
+				entryStart.getFullYear() === group.start.getFullYear() &&
+				entryStart.getMonth() === group.start.getMonth() &&
+				entryStart.getDate() === group.start.getDate()
+			);
+		});
 
 		if (!existingEntry) {
 			return {
@@ -383,35 +429,82 @@ export function parseScheduleConfig(value: unknown): ScheduleConfig {
 		};
 	});
 
-	const calendarUrlValue = (value as Record<string, unknown>).dutyCalendarUrl;
-	let dutyCalendarUrl: string | undefined;
-	if (calendarUrlValue !== undefined) {
-		if (
-			typeof calendarUrlValue !== 'string' ||
-			calendarUrlValue.trim() === ''
-		) {
-			throw new Error('dutyCalendarUrl must be a non-empty HTTPS URL');
+	const dutyCalendarValue = (value as Record<string, unknown>).dutyCalendar;
+	let dutyCalendar: DutyCalendarConfig | undefined;
+	if (dutyCalendarValue !== undefined) {
+		if (typeof dutyCalendarValue !== 'object' || dutyCalendarValue === null) {
+			throw new Error('dutyCalendar must be an object');
 		}
 
-		const trimmedUrl = calendarUrlValue.trim();
+		const calendarRecord = dutyCalendarValue as Record<string, unknown>;
+		if (
+			typeof calendarRecord.url !== 'string' ||
+			calendarRecord.url.trim() === ''
+		) {
+			throw new Error('dutyCalendar.url must be a non-empty HTTPS URL');
+		}
+
+		const trimmedUrl = calendarRecord.url.trim();
 		let parsedUrl: URL;
 		try {
 			parsedUrl = new URL(trimmedUrl);
 		} catch {
-			throw new Error('dutyCalendarUrl must be a valid HTTPS URL');
+			throw new Error('dutyCalendar.url must be a valid HTTPS URL');
 		}
 		if (parsedUrl.protocol !== 'https:') {
-			throw new Error('dutyCalendarUrl must be a valid HTTPS URL');
+			throw new Error('dutyCalendar.url must be a valid HTTPS URL');
 		}
-		dutyCalendarUrl = trimmedUrl;
+		if (
+			typeof calendarRecord.taskIdentifier !== 'string' ||
+			calendarRecord.taskIdentifier.trim() === ''
+		) {
+			throw new Error('dutyCalendar.taskIdentifier must be a non-empty string');
+		}
+		if (
+			typeof calendarRecord.durationMinutes !== 'number' ||
+			!Number.isInteger(calendarRecord.durationMinutes) ||
+			calendarRecord.durationMinutes <= 0
+		) {
+			throw new Error(
+				'dutyCalendar.durationMinutes must be a positive integer',
+			);
+		}
+
+		dutyCalendar = {
+			url: trimmedUrl,
+			taskIdentifier: calendarRecord.taskIdentifier.trim(),
+			durationMinutes: calendarRecord.durationMinutes,
+		};
 	}
 
-	return {meetings, dutyCalendarUrl};
+	return {meetings, dutyCalendar};
 }
 
-function parseCliOptions(arguments_: string[]): CliOptions {
+function parseDateArgument(value: string): Date {
+	const match = /^(\d{4})-(\d{2})-(\d{2})$/u.exec(value);
+	if (!match) {
+		throw new Error(`${DATE_FLAG} must use YYYY-MM-DD format`);
+	}
+
+	const year = Number(match[1]);
+	const monthIndex = Number(match[2]) - 1;
+	const day = Number(match[3]);
+	const date = new Date(year, monthIndex, day, ENTRY_START_HOUR);
+	if (
+		date.getFullYear() !== year ||
+		date.getMonth() !== monthIndex ||
+		date.getDate() !== day
+	) {
+		throw new Error(`${DATE_FLAG} must be a valid calendar date`);
+	}
+
+	return date;
+}
+
+export function parseCliOptions(arguments_: string[]): CliOptions {
 	let configPath: string | URL = DEFAULT_CONFIG_URL;
 	let dryRun = false;
+	let referenceDate = new Date();
 
 	for (let index = 0; index < arguments_.length; index++) {
 		const argument = arguments_[index];
@@ -428,10 +521,23 @@ function parseCliOptions(arguments_: string[]): CliOptions {
 			index++;
 			continue;
 		}
+		if (argument === DATE_FLAG) {
+			const nextArgument = arguments_[index + 1];
+			if (!nextArgument) {
+				throw new Error(`${DATE_FLAG} requires a date`);
+			}
+			referenceDate = parseDateArgument(nextArgument);
+			index++;
+			continue;
+		}
 		throw new Error(`Unknown argument: ${argument}`);
 	}
 
-	return {configPath, dryRun};
+	if (arguments_.includes(DATE_FLAG) && !dryRun) {
+		throw new Error(`${DATE_FLAG} can only be used with ${DRY_RUN_FLAG}`);
+	}
+
+	return {configPath, dryRun, referenceDate};
 }
 
 async function loadScheduleConfig(
@@ -442,21 +548,27 @@ async function loadScheduleConfig(
 }
 
 async function main(): Promise<void> {
-	const {configPath, dryRun} = parseCliOptions(process.argv.slice(2));
+	const {configPath, dryRun, referenceDate} = parseCliOptions(
+		process.argv.slice(2),
+	);
 	const config = await loadScheduleConfig(configPath);
 	let meetings = config.meetings;
 
 	if (
-		config.dutyCalendarUrl &&
-		(await hasDutyDayOffThisFriday(config.dutyCalendarUrl))
+		config.dutyCalendar &&
+		(await hasDutyDayOffThisFriday(config.dutyCalendar.url, referenceDate))
 	) {
-		const fridayMeetingCount = meetings.filter(
-			meeting => meeting.weekday === 'friday',
-		).length;
-		meetings = meetings.filter(meeting => meeting.weekday !== 'friday');
+		const friday = getCurrentWeekDates(referenceDate).get('friday')!;
+		const dutyDayOff = applyDutyDayOff(meetings, config.dutyCalendar);
+		meetings = dutyDayOff.meetings;
 		console.log(
-			`Duty day off this Friday: skipped ${fridayMeetingCount} Friday meeting(s)`,
+			`Duty calendar: found "${DUTY_DAY_OFF_SUMMARY}" on ${formatLocalDate(friday)}`,
 		);
+		if (dutyDayOff.skippedFridayMeetingCount > 0) {
+			console.log(
+				`Skipped ${dutyDayOff.skippedFridayMeetingCount} Friday meeting(s)`,
+			);
+		}
 	}
 
 	if (meetings.length === 0) {
@@ -491,13 +603,16 @@ async function main(): Promise<void> {
 		resolvedMeetings.push({...meeting, taskId});
 	}
 
-	const existingEntries = await getWeekEntries(team.id, user.id);
-	const plan = buildSyncPlan(resolvedMeetings, existingEntries);
+	const existingEntries = await getWeekEntries(team.id, user.id, referenceDate);
+	const plan = buildSyncPlan(resolvedMeetings, existingEntries, referenceDate);
 
 	console.log(`Team: ${team.name} (${team.id})`);
 	console.log(`User: ${user.username} (${user.id})`);
 	if (dryRun) {
 		console.log('Dry run: no ClickUp time entries will be changed');
+		console.log(
+			`Target week: ${formatLocalDate(getCurrentWeekDates(referenceDate).get('monday')!)}`,
+		);
 	}
 
 	for (const item of plan) {

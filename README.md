@@ -98,11 +98,12 @@ The script leaves time-entry descriptions empty and finds existing entries by
 their ClickUp task and scheduled weekday. Removing a meeting from the mapping
 does not delete an existing entry.
 
-The optional `dutyCalendarUrl` must be the HTTPS subscription URL for the duty
-calendar. When it contains an event named `Day off due to duty last weekend`
-for Friday in the current local week, the script skips all meetings configured
-for Friday. Calendar request failures stop the sync so Friday meetings are not
-added when the duty status is unknown.
+The optional `dutyCalendar` object configures the HTTPS subscription URL and
+the ClickUp task and duration used for day-off entries. When the calendar
+contains an event named `Day off due to duty last weekend` for Friday in the
+current local week, the script replaces configured Friday meetings with that
+day-off entry. Calendar request failures stop the sync so Friday entries are
+not added when the duty status is unknown.
 
 ### Run manually
 
@@ -111,6 +112,16 @@ Preview changes:
 ```sh
 bun run clickup:meetings --dry-run
 ```
+
+Preview the week containing a specific date:
+
+```sh
+bun run clickup:meetings --dry-run --date 2026-09-14
+```
+
+`--date` accepts a local date in `YYYY-MM-DD` format and can only be used with
+`--dry-run`. If the duty calendar has a Friday day-off event in the selected
+week, the preview prints the event name and exact date.
 
 Apply / resync:
 

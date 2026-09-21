@@ -1,8 +1,10 @@
 import {describe, expect, test} from 'bun:test';
 import {
+	applyDutyDayOff,
 	buildSyncPlan,
 	getCurrentWeekDates,
 	hasDutyDayOffOnFriday,
+	parseCliOptions,
 	parseScheduleConfig,
 	type TimeEntry,
 } from './sync-clickup-weekly-meetings';
@@ -44,16 +46,24 @@ describe('parseScheduleConfig', () => {
 				durationMinutes: 60,
 			},
 		]);
-		expect(config.dutyCalendarUrl).toBeUndefined();
+		expect(config.dutyCalendar).toBeUndefined();
 	});
 
 	test('parses a duty calendar URL', () => {
 		const config = parseScheduleConfig({
-			dutyCalendarUrl: 'https://calendar.url.localhost/duty-day-off.ics',
+			dutyCalendar: {
+				url: 'https://calendar.url.localhost/duty-day-off.ics',
+				taskIdentifier: 'DAY-OFF-123',
+				durationMinutes: 450,
+			},
 			meetings: [],
 		});
 
-		expect(config.dutyCalendarUrl).toContain('/duty-day-off.ics');
+		expect(config.dutyCalendar).toEqual({
+			url: 'https://calendar.url.localhost/duty-day-off.ics',
+			taskIdentifier: 'DAY-OFF-123',
+			durationMinutes: 450,
+		});
 	});
 
 	test('rejects invalid durations', () => {
@@ -74,10 +84,51 @@ describe('parseScheduleConfig', () => {
 	test('rejects an invalid duty calendar URL', () => {
 		expect(() =>
 			parseScheduleConfig({
-				dutyCalendarUrl: 'webcal://example.com/calendar',
+				dutyCalendar: {
+					url: 'webcal://example.com/calendar',
+					taskIdentifier: 'DAY-OFF-123',
+					durationMinutes: 450,
+				},
 				meetings: [],
 			}),
 		).toThrow('must be a valid HTTPS URL');
+	});
+});
+
+describe('applyDutyDayOff', () => {
+	test('replaces Friday meetings with the configured day-off entry', () => {
+		const result = applyDutyDayOff(
+			[
+				{
+					name: 'Friday sync',
+					taskIdentifier: 'SYNC-123',
+					weekday: 'friday',
+					durationMinutes: 30,
+				},
+				{
+					name: 'Monday sync',
+					taskIdentifier: 'SYNC-456',
+					weekday: 'monday',
+					durationMinutes: 30,
+				},
+			],
+			{
+				url: 'https://calendar.url.localhost/duty-day-off.ics',
+				taskIdentifier: 'DAY-OFF-123',
+				durationMinutes: 450,
+			},
+		);
+
+		expect(result.skippedFridayMeetingCount).toBe(1);
+		expect(result.meetings).toContainEqual({
+			name: 'Day off due to duty last weekend',
+			taskIdentifier: 'DAY-OFF-123',
+			weekday: 'friday',
+			durationMinutes: 450,
+		});
+		expect(
+			result.meetings.some(meeting => meeting.name === 'Friday sync'),
+		).toBe(false);
 	});
 });
 
@@ -88,6 +139,29 @@ describe('getCurrentWeekDates', () => {
 		expect(dates.get('monday')?.getDate()).toBe(7);
 		expect(dates.get('sunday')?.getDate()).toBe(13);
 		expect(dates.get('monday')?.getHours()).toBe(12);
+	});
+});
+
+describe('parseCliOptions', () => {
+	test('accepts a target date for a dry run', () => {
+		const options = parseCliOptions(['--dry-run', '--date', '2026-09-14']);
+
+		expect(options.dryRun).toBe(true);
+		expect(options.referenceDate.getFullYear()).toBe(2026);
+		expect(options.referenceDate.getMonth()).toBe(8);
+		expect(options.referenceDate.getDate()).toBe(14);
+	});
+
+	test('rejects a target date without dry-run', () => {
+		expect(() => parseCliOptions(['--date', '2026-09-14'])).toThrow(
+			'--date can only be used with --dry-run',
+		);
+	});
+
+	test('rejects an invalid target date', () => {
+		expect(() =>
+			parseCliOptions(['--dry-run', '--date', '2026-02-30']),
+		).toThrow('--date must be a valid calendar date');
 	});
 });
 
@@ -140,6 +214,16 @@ describe('buildSyncPlan', () => {
 
 	test('leaves a matching task and day entry unchanged', () => {
 		const plan = buildSyncPlan([meeting], [makeEntry()], NOW);
+
+		expect(plan[0]?.action).toBe('unchanged');
+	});
+
+	test('matches an existing entry at a different time on the same day', () => {
+		const morningEntry = makeEntry({
+			start: new Date(2026, 8, 7, 8, 0, 0).getTime().toString(),
+		});
+
+		const plan = buildSyncPlan([meeting], [morningEntry], NOW);
 
 		expect(plan[0]?.action).toBe('unchanged');
 	});
