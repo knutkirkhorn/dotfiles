@@ -78,6 +78,7 @@ Configure meetings in
 
 ```json
 {
+	"dutyCalendarUrl": "https://calendar.url.localhost/duty-day-off.ics",
 	"meetings": [
 		{
 			"name": "Weekly planning",
@@ -96,6 +97,12 @@ local timezone because only the day and duration are relevant.
 The script leaves time-entry descriptions empty and finds existing entries by
 their ClickUp task and scheduled weekday. Removing a meeting from the mapping
 does not delete an existing entry.
+
+The optional `dutyCalendarUrl` must be the HTTPS subscription URL for the duty
+calendar. When it contains an event named `Day off due to duty last weekend`
+for Friday in the current local week, the script skips all meetings configured
+for Friday. Calendar request failures stop the sync so Friday meetings are not
+added when the duty status is unknown.
 
 ### Run manually
 

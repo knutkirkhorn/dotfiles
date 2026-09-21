@@ -26,6 +26,7 @@ const DEFAULT_CONFIG_URL = new URL(
 const DRY_RUN_FLAG = '--dry-run';
 const CONFIG_FLAG = '--config';
 const ENTRY_START_HOUR = 12;
+const DUTY_DAY_OFF_SUMMARY = 'Day off due to duty last weekend';
 
 const WEEKDAYS = [
 	'monday',
@@ -48,6 +49,7 @@ export interface MeetingConfig {
 
 interface ScheduleConfig {
 	meetings: MeetingConfig[];
+	dutyCalendarUrl?: string;
 }
 
 interface ClickUpUser {
@@ -179,6 +181,53 @@ function getWeekRange(now = new Date()): {start: Date; end: Date} {
 	start.setHours(0, 0, 0, 0);
 	end.setHours(23, 59, 59, 999);
 	return {start, end};
+}
+
+function formatIcsDateOnly(date: Date): string {
+	const year = date.getFullYear().toString().padStart(4, '0');
+	const month = (date.getMonth() + 1).toString().padStart(2, '0');
+	const day = date.getDate().toString().padStart(2, '0');
+	return `${year}${month}${day}`;
+}
+
+export function hasDutyDayOffOnFriday(
+	icsContents: string,
+	now = new Date(),
+): boolean {
+	const friday = getCurrentWeekDates(now).get('friday')!;
+	const fridayDate = formatIcsDateOnly(friday);
+	const unfoldedContents = icsContents.replaceAll(/\r?\n[ \t]/gu, '');
+	const eventBlocks = unfoldedContents.match(
+		/BEGIN:VEVENT\r?\n[\s\S]*?\r?\nEND:VEVENT/gu,
+	);
+
+	return (
+		eventBlocks?.some(eventBlock => {
+			const lines = eventBlock.split(/\r?\n/u);
+			const summary = lines.find(line => line.startsWith('SUMMARY:'));
+			const start = lines.find(line => line.startsWith('DTSTART'));
+
+			return (
+				summary === `SUMMARY:${DUTY_DAY_OFF_SUMMARY}` &&
+				start?.match(/^DTSTART(?:;[^:]*)?:(\d{8})/u)?.[1] === fridayDate
+			);
+		}) ?? false
+	);
+}
+
+async function hasDutyDayOffThisFriday(calendarUrl: string): Promise<boolean> {
+	let response: Response;
+	try {
+		response = await fetch(calendarUrl);
+	} catch {
+		throw new Error('Could not fetch duty calendar');
+	}
+
+	if (!response.ok) {
+		throw new Error(`Duty calendar request failed (${response.status})`);
+	}
+
+	return hasDutyDayOffOnFriday(await response.text());
 }
 
 async function getWeekEntries(
@@ -334,7 +383,30 @@ export function parseScheduleConfig(value: unknown): ScheduleConfig {
 		};
 	});
 
-	return {meetings};
+	const calendarUrlValue = (value as Record<string, unknown>).dutyCalendarUrl;
+	let dutyCalendarUrl: string | undefined;
+	if (calendarUrlValue !== undefined) {
+		if (
+			typeof calendarUrlValue !== 'string' ||
+			calendarUrlValue.trim() === ''
+		) {
+			throw new Error('dutyCalendarUrl must be a non-empty HTTPS URL');
+		}
+
+		const trimmedUrl = calendarUrlValue.trim();
+		let parsedUrl: URL;
+		try {
+			parsedUrl = new URL(trimmedUrl);
+		} catch {
+			throw new Error('dutyCalendarUrl must be a valid HTTPS URL');
+		}
+		if (parsedUrl.protocol !== 'https:') {
+			throw new Error('dutyCalendarUrl must be a valid HTTPS URL');
+		}
+		dutyCalendarUrl = trimmedUrl;
+	}
+
+	return {meetings, dutyCalendarUrl};
 }
 
 function parseCliOptions(arguments_: string[]): CliOptions {
@@ -372,8 +444,22 @@ async function loadScheduleConfig(
 async function main(): Promise<void> {
 	const {configPath, dryRun} = parseCliOptions(process.argv.slice(2));
 	const config = await loadScheduleConfig(configPath);
+	let meetings = config.meetings;
 
-	if (config.meetings.length === 0) {
+	if (
+		config.dutyCalendarUrl &&
+		(await hasDutyDayOffThisFriday(config.dutyCalendarUrl))
+	) {
+		const fridayMeetingCount = meetings.filter(
+			meeting => meeting.weekday === 'friday',
+		).length;
+		meetings = meetings.filter(meeting => meeting.weekday !== 'friday');
+		console.log(
+			`Duty day off this Friday: skipped ${fridayMeetingCount} Friday meeting(s)`,
+		);
+	}
+
+	if (meetings.length === 0) {
 		console.log(`No weekly meetings configured in ${String(configPath)}`);
 		return;
 	}
@@ -396,7 +482,7 @@ async function main(): Promise<void> {
 
 	const taskIds = new Map<string, string>();
 	const resolvedMeetings: ResolvedMeeting[] = [];
-	for (const meeting of config.meetings) {
+	for (const meeting of meetings) {
 		let taskId = taskIds.get(meeting.taskIdentifier);
 		if (!taskId) {
 			taskId = await resolveTaskId(meeting.taskIdentifier, team.id);

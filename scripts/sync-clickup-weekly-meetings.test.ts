@@ -2,6 +2,7 @@ import {describe, expect, test} from 'bun:test';
 import {
 	buildSyncPlan,
 	getCurrentWeekDates,
+	hasDutyDayOffOnFriday,
 	parseScheduleConfig,
 	type TimeEntry,
 } from './sync-clickup-weekly-meetings';
@@ -43,6 +44,16 @@ describe('parseScheduleConfig', () => {
 				durationMinutes: 60,
 			},
 		]);
+		expect(config.dutyCalendarUrl).toBeUndefined();
+	});
+
+	test('parses a duty calendar URL', () => {
+		const config = parseScheduleConfig({
+			dutyCalendarUrl: 'https://calendar.url.localhost/duty-day-off.ics',
+			meetings: [],
+		});
+
+		expect(config.dutyCalendarUrl).toContain('/duty-day-off.ics');
 	});
 
 	test('rejects invalid durations', () => {
@@ -59,6 +70,15 @@ describe('parseScheduleConfig', () => {
 			}),
 		).toThrow('durationMinutes must be a positive integer');
 	});
+
+	test('rejects an invalid duty calendar URL', () => {
+		expect(() =>
+			parseScheduleConfig({
+				dutyCalendarUrl: 'webcal://example.com/calendar',
+				meetings: [],
+			}),
+		).toThrow('must be a valid HTTPS URL');
+	});
 });
 
 describe('getCurrentWeekDates', () => {
@@ -68,6 +88,35 @@ describe('getCurrentWeekDates', () => {
 		expect(dates.get('monday')?.getDate()).toBe(7);
 		expect(dates.get('sunday')?.getDate()).toBe(13);
 		expect(dates.get('monday')?.getHours()).toBe(12);
+	});
+});
+
+describe('hasDutyDayOffOnFriday', () => {
+	test('finds a day-off event on Friday in the current week', () => {
+		const calendar = [
+			'BEGIN:VCALENDAR',
+			'BEGIN:VEVENT',
+			'DTSTART;VALUE=DATE:20260911',
+			'DTEND;VALUE=DATE:20260912',
+			'SUMMARY:Day off due to duty last weekend',
+			'END:VEVENT',
+			'END:VCALENDAR',
+		].join('\r\n');
+
+		expect(hasDutyDayOffOnFriday(calendar, NOW)).toBe(true);
+	});
+
+	test('ignores day-off events on another Friday', () => {
+		const calendar = [
+			'BEGIN:VCALENDAR',
+			'BEGIN:VEVENT',
+			'DTSTART;VALUE=DATE:20260918',
+			'SUMMARY:Day off due to duty last weekend',
+			'END:VEVENT',
+			'END:VCALENDAR',
+		].join('\r\n');
+
+		expect(hasDutyDayOffOnFriday(calendar, NOW)).toBe(false);
 	});
 });
 
