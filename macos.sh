@@ -15,6 +15,8 @@ brew install mike-engel/jwt-cli/jwt-cli
 brew install oven-sh/bun/bun
 # Instant Space Switcher (https://github.com/jurplel/InstantSpaceSwitcher)
 brew install --cask jurplel/tap/instant-space-switcher
+# Codexbar (https://github.com/steipete/CodexBar)
+brew install steipete/tap/codexbar
 
 # Install Homebrew packages using Zerobrew
 zb bundle
