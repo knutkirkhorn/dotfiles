@@ -42,7 +42,8 @@ brew install --cask \
 	android-platform-tools \
 	crystalfetch \
 	stats \
-	thaw
+	thaw \
+	vorssaint
 
 # Install mysql, did not work through zerobrew (test again later):
 brew install mysql-client
