@@ -78,7 +78,11 @@ Configure meetings in
 
 ```json
 {
-	"dutyCalendarUrl": "https://calendar.url.localhost/duty-day-off.ics",
+	"dutyCalendar": {
+		"url": "https://calendar.url.localhost/duty-day-off.ics",
+		"taskIdentifier": "DAY-OFF-TASK-ID",
+		"durationMinutes": 450
+	},
 	"meetings": [
 		{
 			"name": "Weekly planning",
