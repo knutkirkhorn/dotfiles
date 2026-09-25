@@ -8,6 +8,12 @@ if [ -n "${ZSH_VERSION:-}" ]; then
 fi
 DOTFILES_DIR="$(cd "$(dirname "$BOOTSTRAP_PATH")" && pwd)"
 
+# Read only AGENT_EXTRAS_SOURCE from .env so other secrets are not loaded into the shell
+DOTFILES_ENV_FILE="$DOTFILES_DIR/.env"
+if [ -z "${AGENT_EXTRAS_SOURCE:-}" ] && [ -f "$DOTFILES_ENV_FILE" ]; then
+	AGENT_EXTRAS_SOURCE="$(sed -n 's/^AGENT_EXTRAS_SOURCE=//p' "$DOTFILES_ENV_FILE" | tail -n 1 | tr -d "\"'")"
+fi
+
 # Symlink files to ~
 ln -sf "$DOTFILES_DIR/.aliases" "$HOME/.aliases"
 ln -sf "$DOTFILES_DIR/.functions" "$HOME/.functions"
@@ -30,14 +36,17 @@ fi
 # Used to hide the login message
 ln -sf "$DOTFILES_DIR/.hushlogin" "$HOME/.hushlogin"
 
-# Symlink ~/.agents to repo .agents when safe
-if [ -e "$HOME/.agents" ] && [ ! -L "$HOME/.agents" ]; then
-	echo "Skipping .agents symlink: $HOME/.agents exists and is not a symlink"
-	echo "Cleanup before continuing..."
-	exit 1
-else
-	ln -sfn "$DOTFILES_DIR/.agents" "$HOME/.agents"
+# Copy agent configuration so local and external files can coexist
+if [ -L "$HOME/.agents" ]; then
+	AGENTS_LINK_TARGET="$(readlink "$HOME/.agents")"
+	if [ "$AGENTS_LINK_TARGET" != "$DOTFILES_DIR/.agents" ]; then
+		echo "Cannot replace .agents symlink: $HOME/.agents points to $AGENTS_LINK_TARGET"
+		return 1 2>/dev/null || exit 1
+	fi
+	rm "$HOME/.agents"
 fi
+mkdir -p "$HOME/.agents"
+cp -R "$DOTFILES_DIR/.agents/." "$HOME/.agents/"
 
 # Copy Cursor rules to home directory
 CURSOR_RULES_DIR="$HOME/.cursor/rules"
@@ -52,6 +61,37 @@ cp "$DOTFILES_DIR/.cursor/rules/prefer-zb-over-brew.mdc" "$CURSOR_RULES_DIR/pref
 CURSOR_SKILLS_DIR="$HOME/.cursor/skills"
 mkdir -p "$CURSOR_SKILLS_DIR/iso-compliance-review"
 cp "$DOTFILES_DIR/.cursor/skills/iso-compliance-review/SKILL.md" "$CURSOR_SKILLS_DIR/iso-compliance-review/SKILL.md"
+
+# Symlink optional agent configuration stored outside this repository
+AGENT_EXTRAS_DIR="$HOME/.config/dotfiles/agent-extras"
+if [ -z "${AGENT_EXTRAS_SOURCE:-}" ] && [ ! -e "$AGENT_EXTRAS_DIR" ] && [ -t 0 ]; then
+	printf "Path to agent extras source directory (leave empty to skip): "
+	read -r AGENT_EXTRAS_SOURCE
+	if [ -n "$AGENT_EXTRAS_SOURCE" ]; then
+		echo "AGENT_EXTRAS_SOURCE=\"$AGENT_EXTRAS_SOURCE\"" >>"$DOTFILES_ENV_FILE"
+	fi
+fi
+if [ -n "${AGENT_EXTRAS_SOURCE:-}" ]; then
+	AGENT_EXTRAS_SOURCE="${AGENT_EXTRAS_SOURCE/#\~/$HOME}"
+	if [ ! -d "$AGENT_EXTRAS_SOURCE" ]; then
+		echo "Skipping agent extras: $AGENT_EXTRAS_SOURCE is not a directory"
+	elif [ -e "$AGENT_EXTRAS_DIR" ] && [ ! -L "$AGENT_EXTRAS_DIR" ]; then
+		echo "Skipping agent extras: $AGENT_EXTRAS_DIR exists and is not a symlink"
+	else
+		mkdir -p "$(dirname "$AGENT_EXTRAS_DIR")"
+		ln -sfn "$AGENT_EXTRAS_SOURCE" "$AGENT_EXTRAS_DIR"
+	fi
+fi
+
+# Overlay agent extras on top of the repository-managed files
+if [ -d "$AGENT_EXTRAS_DIR/.cursor" ]; then
+	mkdir -p "$HOME/.cursor"
+	cp -R "$AGENT_EXTRAS_DIR/.cursor/." "$HOME/.cursor/"
+fi
+if [ -d "$AGENT_EXTRAS_DIR/.agents" ]; then
+	mkdir -p "$HOME/.agents"
+	cp -R "$AGENT_EXTRAS_DIR/.agents/." "$HOME/.agents/"
+fi
 
 # Symlink launchd jobs
 LAUNCH_AGENTS_DIR="$HOME/Library/LaunchAgents"

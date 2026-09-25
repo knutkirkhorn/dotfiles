@@ -10,6 +10,47 @@ Run this command when installing or refreshing the dotfiles
 source bootstrap.sh
 ```
 
+### External Cursor and agent configuration
+
+Files that should stay outside this repository live in a separate directory
+(for example another repository). `bootstrap.sh` symlinks
+`~/.config/dotfiles/agent-extras` to that directory. It mirrors Cursor and agent
+home directories:
+
+```text
+~/.config/dotfiles/agent-extras/
+├── .cursor/
+│   ├── rules/
+│   ├── skills/
+│   └── hooks.json
+└── .agents/
+    └── skills/
+```
+
+Running `source bootstrap.sh` copies these files into `~/.cursor` and
+`~/.agents` after the repository-managed files. External files therefore
+override files with the same relative path. The destination files are regular
+copies, not symlinks.
+
+Set the source directory in `.env`:
+
+```sh
+AGENT_EXTRAS_SOURCE="/path/to/private-config"
+```
+
+Only this line is read from `.env`, so other variables in it are not exported
+into your shell. A leading `~` is expanded, but other shell variables are not.
+
+If `AGENT_EXTRAS_SOURCE` is not set and the symlink does not exist yet,
+`bootstrap.sh` asks for the path and saves the answer to `.env`. Leave it empty
+to skip. An existing symlink is kept as is when no source is set.
+
+To use another source directory for one run:
+
+```sh
+AGENT_EXTRAS_SOURCE=/path/to/private-config source bootstrap.sh
+```
+
 ### npm
 
 Scripts live under [`npm/`](npm/).
