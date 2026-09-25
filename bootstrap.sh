@@ -1,12 +1,18 @@
 #!/usr/bin/env bash
 
-git pull --quiet
-
 BOOTSTRAP_PATH="${BASH_SOURCE[0]:-}"
 if [ -n "${ZSH_VERSION:-}" ]; then
 	BOOTSTRAP_PATH="$(eval 'printf "%s\n" "${(%):-%x}"')"
 fi
 DOTFILES_DIR="$(cd "$(dirname "$BOOTSTRAP_PATH")" && pwd)"
+
+# Run in a subshell so a failing step stops the bootstrap without closing the sourcing shell
+(
+set -euo pipefail
+
+if ! git -C "$DOTFILES_DIR" pull --quiet; then
+	echo "Warning: git pull failed, continuing with local files" >&2
+fi
 
 # Read only AGENT_EXTRAS_SOURCE from .env so other secrets are not loaded into the shell
 DOTFILES_ENV_FILE="$DOTFILES_DIR/.env"
@@ -40,8 +46,8 @@ ln -sf "$DOTFILES_DIR/.hushlogin" "$HOME/.hushlogin"
 if [ -L "$HOME/.agents" ]; then
 	AGENTS_LINK_TARGET="$(readlink "$HOME/.agents")"
 	if [ "$AGENTS_LINK_TARGET" != "$DOTFILES_DIR/.agents" ]; then
-		echo "Cannot replace .agents symlink: $HOME/.agents points to $AGENTS_LINK_TARGET"
-		return 1 2>/dev/null || exit 1
+		echo "Cannot replace .agents symlink: $HOME/.agents points to $AGENTS_LINK_TARGET" >&2
+		exit 1
 	fi
 	rm "$HOME/.agents"
 fi
@@ -93,17 +99,16 @@ if [ -d "$AGENT_EXTRAS_DIR/.agents" ]; then
 	cp -R "$AGENT_EXTRAS_DIR/.agents/." "$HOME/.agents/"
 fi
 
-# Symlink launchd jobs
+# Symlink and reload launchd jobs
 LAUNCH_AGENTS_DIR="$HOME/Library/LaunchAgents"
+LAUNCHD_DOMAIN="gui/$(id -u)"
 mkdir -p "$LAUNCH_AGENTS_DIR"
-ln -sfn "$DOTFILES_DIR/scripts/launchd/com.knutkirkhorn.clickup-weekly-meetings.plist" "$LAUNCH_AGENTS_DIR/com.knutkirkhorn.clickup-weekly-meetings.plist"
-ln -sfn "$DOTFILES_DIR/scripts/launchd/com.knutkirkhorn.macos-storage-check.plist" "$LAUNCH_AGENTS_DIR/com.knutkirkhorn.macos-storage-check.plist"
-# Reload launchd jobs
-launchctl unload "$LAUNCH_AGENTS_DIR/com.knutkirkhorn.clickup-weekly-meetings.plist" 2>/dev/null
-launchctl load "$LAUNCH_AGENTS_DIR/com.knutkirkhorn.clickup-weekly-meetings.plist"
-launchctl start com.knutkirkhorn.clickup-weekly-meetings
-launchctl unload "$LAUNCH_AGENTS_DIR/com.knutkirkhorn.macos-storage-check.plist" 2>/dev/null
-launchctl load "$LAUNCH_AGENTS_DIR/com.knutkirkhorn.macos-storage-check.plist"
+for LAUNCHD_LABEL in com.knutkirkhorn.clickup-weekly-meetings com.knutkirkhorn.macos-storage-check; do
+	LAUNCHD_PLIST="$LAUNCH_AGENTS_DIR/$LAUNCHD_LABEL.plist"
+	ln -sfn "$DOTFILES_DIR/scripts/launchd/$LAUNCHD_LABEL.plist" "$LAUNCHD_PLIST"
+	launchctl bootout "$LAUNCHD_DOMAIN/$LAUNCHD_LABEL" 2>/dev/null || true
+	launchctl bootstrap "$LAUNCHD_DOMAIN" "$LAUNCHD_PLIST"
+done
 
 # Set global gitignore
 git config --global core.excludesfile ~/.gitignore
@@ -111,6 +116,14 @@ git config --global core.excludesfile ~/.gitignore
 # Check if .extra exists and create it if it doesn't
 if [ ! -f ~/.extra ]; then
 	touch ~/.extra
+fi
+)
+# Check the status separately because errexit is ignored in a subshell followed by ||
+BOOTSTRAP_STATUS=$?
+if [ "$BOOTSTRAP_STATUS" -ne 0 ]; then
+	echo "Bootstrap failed, dotfiles were not fully refreshed" >&2
+	# shellcheck disable=SC2317
+	return "$BOOTSTRAP_STATUS" 2>/dev/null || exit "$BOOTSTRAP_STATUS"
 fi
 
 # Skip shellcheck for this file, we are already validating the one in the repo anyway
