@@ -47,6 +47,8 @@ fi
 
 {
 	printf '# Raycast extensions (%d) exported %s\n' "$count" "$(date '+%Y-%m-%d %H:%M:%S')"
+	# Backticks are literal Markdown in the exported file
+	# shellcheck disable=SC2016
 	printf '# Reinstall extensions by running `raycast/install-extensions.sh`.\n\n'
 	cat "$tmp_file"
 } >"$OUTPUT_FILE"

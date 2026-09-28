@@ -11,43 +11,28 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y shellcheck
-      - name: Bash syntax check
+      - name: Bash syntax check and ShellCheck
         run: |
+          shopt -s nullglob
           files=(
-            ".aliases"
-            ".bash_profile"
-            ".functions"
-            "bootstrap.sh"
-            "brew-update.sh"
-            "macos.sh"
-            "test.sh"
-            "npm/npm.sh"
-            "npm/npm-security-hardening.sh"
-            "tests/test-base64decode.sh"
-            "tests/test-npm-security-hardening-ignore-scripts.sh"
-            "tests/test-open-pr.sh"
-            "tests/test-open-gitlab-pr.sh"
+            .aliases
+            .bash_profile
+            .functions
+            bootstrap.sh
+            brew-update.sh
+            macos.sh
+            test.sh
+            npm/*.sh
+            tests/*.sh
+            macos/*.sh
+            macos/*/*.sh
+            raycast/*.sh
+            scripts/*.sh
           )
           for file in "${files[@]}"; do
             bash -n "$file"
           done
-      - name: ShellCheck
-        # TODO: fix these disabled shellcheck errors later
-        run: |
-          shellcheck -e SC1090,SC2198,SC2005 \
-            .aliases \
-            .bash_profile \
-            .functions \
-            bootstrap.sh \
-            brew-update.sh \
-            macos.sh \
-            test.sh \
-            npm/npm.sh \
-            npm/npm-security-hardening.sh \
-            tests/test-base64decode.sh \
-            tests/test-npm-security-hardening-ignore-scripts.sh \
-            tests/test-open-pr.sh \
-            tests/test-open-gitlab-pr.sh
+          shellcheck "${files[@]}"
 
   tests:
     runs-on: ubuntu-latest

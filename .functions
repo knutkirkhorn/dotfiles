@@ -10,12 +10,12 @@ function gb() {
 function mkdc() {
 	# Check if directory already exists
 	# Throw an error if it does
-	if [ -d "$@" ]; then
+	if [ -d "$1" ]; then
 		echo "Directory already exists"
 		return 1
 	fi
 
-	mkdir -p "$@" && cd "$@" && npm init -y && code .
+	mkdir -p "$1" && cd "$1" && npm init -y && code .
 }
 
 # Install npm dependencies and add `@latest` to each dependency
@@ -60,7 +60,7 @@ function sqlpretty() {
 	# - '\' in front of '"'
 	# The output is saved back to the clipboard
 
-	echo "$(pbpaste | tr -d '\n' | sed 's/\\"/"/g')" | pbcopy
+	pbpaste | tr -d '\n' | sed 's/\\"/"/g' | pbcopy
 }
 
 function base64decode() {

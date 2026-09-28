@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Sourced files live in the home directory, where ShellCheck cannot follow them
+# shellcheck disable=SC1090
 source ~/.aliases
 source ~/.functions
 source ~/.extra

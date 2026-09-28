@@ -40,6 +40,7 @@ build_mouser_from_source() {
 		cd "$source_dir"
 		uv venv
 		uv pip install --python .venv/bin/python -r requirements.txt
+		# shellcheck source=/dev/null
 		source .venv/bin/activate
 		./build_macos_app.sh
 	)
