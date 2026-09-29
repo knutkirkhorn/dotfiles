@@ -28,7 +28,7 @@ brew "steipete/tap/codexbar"
 
 # GUI apps
 cask "firefox"
-cask "docker"
+cask "docker-desktop"
 cask "visual-studio-code"
 cask "cursor"
 cask "raycast"
