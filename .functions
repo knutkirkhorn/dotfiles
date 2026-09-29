@@ -18,42 +18,6 @@ function mkdc() {
 	mkdir -p "$1" && cd "$1" && npm init -y && code .
 }
 
-# Install npm dependencies and add `@latest` to each dependency
-function nil() {
-	packages=""
-
-	for package in "$@"; do
-		# Remove existing "@latest" if present
-		package="${package/@latest/}"
-
-		# Append "@latest" to each package
-		package="$package@latest"
-
-		packages="$packages$package "
-	done
-
-	# npm i $packages
-	echo "TODO: buggy - use 'ncu' CLI instead (bun add -g npm-check-updates)"
-}
-
-# Install npm dev dependencies and add `@latest` to each dependency
-function nidl() {
-	packages=""
-
-	for package in "$@"; do
-		# Remove existing "@latest" if present
-		package="${package/@latest/}"
-
-		# Append "@latest" to each package
-		package="$package@latest"
-
-		packages="$packages$package "
-	done
-
-	# npm i -D $packages
-	echo "TODO: buggy - use 'ncu' CLI instead (bun add -g npm-check-updates)"
-}
-
 function sqlpretty() {
 	# Really dumb CLI function that uses the clipboard and removes:
 	# - '\n'
