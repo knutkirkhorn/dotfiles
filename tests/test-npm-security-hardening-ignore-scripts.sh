@@ -141,7 +141,7 @@ run_pnpm_ignored_builds_regression_test() {
 		echo -e "  ${RED}FAIL${NC}: pnpm approve-builds did not run the failing lifecycle script"
 		sed 's/^/    /' "$approved_output"
 		FAIL=$((FAIL + 1))
-	elif grep -q 'preinstall' "$approved_output" && grep -q 'ELIFECYCLE' "$approved_output"; then
+	elif grep -q 'preinstall' "$approved_output" && grep -Eq 'ELIFECYCLE|ERR_PNPM_EXECUTOR_LIFECYCLE_SCRIPT_FAILED' "$approved_output"; then
 		echo -e "  ${GREEN}PASS${NC}: pnpm approve-builds runs the canary lifecycle script"
 		PASS=$((PASS + 1))
 	else
