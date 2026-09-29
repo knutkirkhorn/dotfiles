@@ -6,5 +6,10 @@ alwaysApply: true
 
 - When adding a rule to `.cursor/rules/`, add its explicit `cp` entry to `bootstrap.sh` so it is synced to `~/.cursor/rules/`
 - When adding a skill to `.cursor/skills/`, add its explicit `cp` entry to `bootstrap.sh` so it is synced to `~/.cursor/skills/`
-- After finishing changes, run the tests documented in `/tests/README.md`
+- After finishing changes, run the same checks as CI (`.github/workflows/main.yml`) and fix any failures:
+  - `shellcheck <changed shell files>` with no global exclusions; use inline `# shellcheck` directives only for intentional cases
+  - `bun lint` and `bun format:check`
+  - `plutil -lint scripts/launchd/*.plist` when a launchd plist changed
+  - The tests documented in `/tests/README.md` (`bash test.sh`)
+- When adding a shell script outside the folders globbed in the CI ShellCheck step, add it to that list
 - Apply new changes by running `source bootstrap.sh`
