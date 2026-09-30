@@ -25,6 +25,8 @@ brew "oven-sh/bun/bun"
 cask "jurplel/tap/instant-space-switcher"
 # Codexbar (https://github.com/steipete/CodexBar)
 brew "steipete/tap/codexbar"
+# Desktop Plus (https://github.com/desktop-plus/desktop-plus)
+cask "desktop-plus/tap/desktop-plus"
 
 # GUI apps
 cask "firefox"
