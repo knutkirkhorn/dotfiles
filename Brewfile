@@ -47,7 +47,7 @@ cask "crystalfetch"
 cask "stats"
 cask "thaw"
 cask "vorssaint"
-# cask "tablepro"
+cask "tablepro"
 
 # Mac App Store apps
 mas "Pure Paste", id: 1611378436
