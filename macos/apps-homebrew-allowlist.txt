@@ -1,0 +1,6 @@
+# Apps intentionally installed outside Homebrew Cask
+# One .app name per line; lines starting with # are ignored
+
+# Built from source via macos/macos-fromsource.sh
+LaunchManager.app
+Mouser.app

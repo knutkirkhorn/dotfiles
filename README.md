@@ -83,6 +83,12 @@ Touch ID for `sudo`: the PAM snippet lives in [`macos/pam.d/sudo_local`](macos/p
 
 This copies that file to `/etc/pam.d/sudo_local` (requires `sudo`). Your OS `/etc/pam.d/sudo` must include `sudo_local` (current macOS does by default).
 
+Check that GUI apps are Homebrew Cask-managed (allowlist: [`macos/apps-homebrew-allowlist.txt`](macos/apps-homebrew-allowlist.txt)):
+
+```sh
+./macos/check-apps-homebrew.sh
+```
+
 ### Windows
 
 Windows setup scripts live under [`windows/`](windows/). Run [`windows/windows.ps1`](windows/windows.ps1) in PowerShell to install GUI and CLI apps via `winget` (run from the repo root, or adjust the path).
