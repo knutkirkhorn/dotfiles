@@ -108,6 +108,30 @@ interface CliOptions {
 	referenceDate: Date;
 }
 
+function pad(value: number, length = 2): string {
+	return String(value).padStart(length, '0');
+}
+
+function localTimestamp(date: Date): string {
+	const offsetMinutes = -date.getTimezoneOffset();
+	const sign = offsetMinutes >= 0 ? '+' : '-';
+	const absOffset = Math.abs(offsetMinutes);
+	return (
+		`${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` +
+		` ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}` +
+		`${sign}${pad(Math.floor(absOffset / 60))}:${pad(absOffset % 60)}`
+	);
+}
+
+/** Prefixes every console.log/warn/error line with a local timestamp */
+function enableTimestampedLogs(): void {
+	for (const method of ['log', 'warn', 'error'] as const) {
+		const original = console[method].bind(console);
+		console[method] = (...args: unknown[]) =>
+			original(`[${localTimestamp(new Date())}]`, ...args);
+	}
+}
+
 function getApiKey(): string {
 	const apiKey = process.env.CLICKUP_API_KEY;
 	if (!apiKey) {
@@ -650,6 +674,8 @@ async function main(): Promise<void> {
 }
 
 if (import.meta.main) {
+	enableTimestampedLogs();
+
 	try {
 		await main();
 	} catch (error) {
