@@ -101,7 +101,9 @@ fi
 LAUNCH_AGENTS_DIR="$HOME/Library/LaunchAgents"
 LAUNCHD_DOMAIN="gui/$(id -u)"
 mkdir -p "$LAUNCH_AGENTS_DIR"
-for LAUNCHD_LABEL in com.knutkirkhorn.clickup-weekly-meetings com.knutkirkhorn.macos-storage-check; do
+# Disabled for now: com.knutkirkhorn.clickup-weekly-meetings
+# shellcheck disable=SC2043
+for LAUNCHD_LABEL in com.knutkirkhorn.macos-storage-check; do
 	LAUNCHD_PLIST="$LAUNCH_AGENTS_DIR/$LAUNCHD_LABEL.plist"
 	ln -sfn "$DOTFILES_DIR/scripts/launchd/$LAUNCHD_LABEL.plist" "$LAUNCHD_PLIST"
 	launchctl bootout "$LAUNCHD_DOMAIN/$LAUNCHD_LABEL" 2>/dev/null || true

@@ -190,7 +190,8 @@ bun run clickup:meetings --dry-run --config path/to/meetings.json
 
 A launchd job runs the sync every Monday at 09:05 (and on load). The plist is
 [`scripts/launchd/com.knutkirkhorn.clickup-weekly-meetings.plist`](scripts/launchd/com.knutkirkhorn.clickup-weekly-meetings.plist)
-and is symlinked to `~/Library/LaunchAgents` by `bootstrap.sh`. Logs go to
+and is symlinked to `~/Library/LaunchAgents` by `bootstrap.sh` (currently
+disabled there; add the label back to the launchd loop to re-enable). Logs go to
 `/tmp/clickup-weekly-meetings.out.log` and `/tmp/clickup-weekly-meetings.err.log`.
 Each log line is prefixed with a local timestamp.
 
