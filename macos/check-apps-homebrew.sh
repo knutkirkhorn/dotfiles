@@ -11,9 +11,6 @@
 
 set -euo pipefail
 
-PASS=0
-FAIL=0
-
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 YELLOW='\033[0;33m'
@@ -201,15 +198,16 @@ if [[ "$mas_count" -gt 0 ]]; then
 	fi
 fi
 
+PASS=$((installed_count - unmanaged_count))
+FAIL=$unmanaged_count
+
 if [[ "$unmanaged_count" -eq 0 ]]; then
 	echo -e "  ${GREEN}PASS${NC}: all non-allowlisted apps are Homebrew Cask or App Store managed"
-	PASS=$((PASS + 1))
 else
 	echo -e "  ${RED}FAIL${NC}: $unmanaged_count app(s) installed outside Homebrew Cask:"
 	while IFS= read -r app; do
 		[[ -n "$app" ]] && echo "    - $app"
 	done <"$unmanaged_file"
-	FAIL=$((FAIL + 1))
 fi
 
 echo ""
